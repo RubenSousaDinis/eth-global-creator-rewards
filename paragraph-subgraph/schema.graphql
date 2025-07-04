@@ -15,3 +15,15 @@ type ContractDeployed @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+
+type FeeDistributed @entity(immutable: true) {
+  id: Bytes!
+  minter: Bytes! # string
+  caller: Bytes! # uint256
+  recipient: Bytes!
+  amount: BigInt!
+  feeType: String!
+  blockTimestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}

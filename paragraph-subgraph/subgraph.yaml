@@ -24,3 +24,23 @@ dataSources:
         - event: ContractDeployed((string,string,address,address,address,uint256,uint256),indexed address,string,uint256,uint256)
           handler: handleContractDeployed
       file: ./src/erc-721-factory.ts
+  - kind: ethereum
+    name: FeeManager
+    network: base
+    source:
+      address: "0x54A57E8Cee1c443d3090F901e85741e4E3Cadba1"
+      abi: FeeManager
+      startBlock: 5348001
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - FeeDistributed
+      abis:
+        - name: FeeManager
+          file: ./abis/FeeManager.json
+      eventHandlers:
+        - event: FeeDistributed(indexed address,indexed address,indexed address,uint256,string)
+          handler: handleFeeDistributed
+      file: ./src/fee-manager.ts

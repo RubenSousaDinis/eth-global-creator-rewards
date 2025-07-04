@@ -3,6 +3,10 @@
     "ERC721Factory": {
       "address": "0x9bf9d0d88c1a835f1052ef0fba325b35bbea127a",
       "startBlock": 5991685
+    },
+    "FeeManager": {
+      "address": "0x54A57E8Cee1c443d3090F901e85741e4E3Cadba1",
+      "startBlock": 5348001
     }
   }
 }
