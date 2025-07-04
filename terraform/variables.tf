@@ -124,4 +124,17 @@ variable "nextauth_secret" {
   description = "NextAuth secret for JWT signing"
   type        = string
   sensitive   = true
+}
+
+# OpenNext Configuration
+variable "open_next_prefix" {
+  description = "Prefix for OpenNext resources (affects bucket and distribution names)"
+  type        = string
+  default     = "creator-rewards"
+}
+
+variable "open_next_folder_path" {
+  description = "Path to the .open-next folder"
+  type        = string
+  default     = "../.open-next"
 } 

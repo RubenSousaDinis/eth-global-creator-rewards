@@ -8,10 +8,11 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "aws-deploy-test-terraform-state"
+    bucket = "eth-global-creator-rewards-terraform-state"
     key    = "terraform.tfstate"
     region = "eu-west-1"
     encrypt = true
+    dynamodb_table = "eth-global-creator-rewards-terraform-locks"
   }
 }
 
@@ -136,8 +137,8 @@ module "open_next" {
   source  = "RJPearson94/open-next/aws//modules/tf-aws-open-next-zone"
   version = "3.1.0"
 
-  prefix = "myapp-rubendinis-${random_id.suffix.hex}"
-  folder_path = "../.open-next"
+  prefix = "creator-rewards-${random_id.suffix.hex}"
+  folder_path = var.open_next_folder_path
 
   # Server function configuration
   server_function = {
