@@ -1,0 +1,8 @@
+{
+  "base": {
+    "ERC721Factory": {
+      "address": "0x9bf9d0d88c1a835f1052ef0fba325b35bbea127a",
+      "startBlock": 5991685
+    }
+  }
+}
