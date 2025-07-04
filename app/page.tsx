@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Header } from "@/components/navigation/Header";
+import { BottomNav } from "@/components/navigation/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Home, Trophy, User, Settings } from "lucide-react";
 
@@ -41,7 +42,7 @@ export default function App() {
         onInfoClick={() => console.log("Info clicked")}
       />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 pb-20 md:pb-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center space-y-6">
             <h1 className="text-4xl font-bold tracking-tight">Creator Score</h1>
@@ -53,16 +54,24 @@ export default function App() {
                 {showNav ? "Hide Navigation" : "Show Navigation"}
               </Button>
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground space-y-2">
               <p>
                 • Click the info button (❓) in the header to test functionality
               </p>
-              <p>• Toggle navigation to see different header states</p>
+              <p>
+                • Toggle navigation to see different header/bottom nav states
+              </p>
               <p>• Check browser console for click events</p>
+              <p>
+                • Bottom navigation appears on mobile (resize browser to test)
+              </p>
             </div>
           </div>
         </div>
       </main>
+
+      {/* Our BottomNav Component */}
+      <BottomNav navItems={showNav ? mockNavItems : []} />
     </div>
   );
 }
