@@ -116,7 +116,7 @@ resource "aws_db_instance" "database" {
 
 # Parameter group for PostgreSQL
 resource "aws_db_parameter_group" "database" {
-  family = "postgres15"
+  family = "postgres16"
   name   = "${var.app_name}-db-params"
 
   parameter {
@@ -137,7 +137,7 @@ module "open_next" {
   source  = "RJPearson94/open-next/aws//modules/tf-aws-open-next-zone"
   version = "3.1.0"
 
-  prefix = "creator-rewards-${random_id.suffix.hex}"
+  prefix = "creator-rewards"
   folder_path = var.open_next_folder_path
 
   # Server function configuration
@@ -161,10 +161,6 @@ module "open_next" {
     aws.dns            = aws
     aws.global         = aws
   }
-}
-
-resource "random_id" "suffix" {
-  byte_length = 4
 }
 
 # Custom domain configuration (only if domain_name is provided)

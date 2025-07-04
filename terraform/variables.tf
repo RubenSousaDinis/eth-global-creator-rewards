@@ -137,4 +137,6 @@ variable "open_next_folder_path" {
   description = "Path to the .open-next folder"
   type        = string
   default     = "../.open-next"
-} 
+}
+
+ 
