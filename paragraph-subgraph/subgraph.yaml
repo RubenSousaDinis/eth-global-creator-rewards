@@ -5,6 +5,26 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
+    name: ERC721FactoryOld
+    network: base
+    source:
+      address: "0xb7a72146c3d225fce86797191d3c8c674bc8d58e"
+      abi: ERC721Factory
+      startBlock: 5348012
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ContractDeployed
+      abis:
+        - name: ERC721Factory
+          file: ./abis/ERC721Factory.json
+      eventHandlers:
+        - event: ContractDeployed((string,string,address,address,address,uint256,uint256),indexed address,string,uint256,uint256)
+          handler: handleContractDeployed
+      file: ./src/erc-721-factory.ts
+  - kind: ethereum
     name: ERC721Factory
     network: base
     source:
