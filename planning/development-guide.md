@@ -1,14 +1,14 @@
-# Creator Score Miniapp - Migration Guide
+# Creator Score Miniapp - Development Guide
 
 ## Overview
 
-You are helping migrate a **Creator Score Miniapp** from an old repository to a new one, following a **strict modular architecture**. The new app must follow these core principles:
+This guide outlines the development of a **Creator Score Miniapp** using a **strict modular architecture** and following these core principles:
 
 ```
 External APIs → Services → Hooks → Pure UI Components
 ```
 
-## Migration Strategy
+## Development Strategy
 
 **Order of Operations**: Foundation → Navigation → Leaderboard → Profile → Integration
 **Commit Strategy**: One commit per component with descriptive messages that tell the story
@@ -16,8 +16,7 @@ External APIs → Services → Hooks → Pure UI Components
 ## Project Context
 
 ### Current State
-- **Old Repo**: Has working Creator Score Miniapp with mixed architecture
-- **New Repo**: Started with Base Minikit (Next.js bootstrap) - no shadcn/ui yet
+- **Base**: Started with Base Minikit (Next.js bootstrap) 
 - **Target**: Modular architecture with pure UI components and centralized data fetching
 
 ### Architecture Principles
@@ -35,7 +34,7 @@ External APIs → Services → Hooks → Pure UI Components
 - Install and configure shadcn/ui
 - Set up Tailwind CSS with proper configuration
 - Create basic folder structure (`components/`, `hooks/`, `lib/`, `services/`)
-- Install required dependencies (React Query, etc.)
+- Install required dependencies
 
 **Commit**: `feat: initial project setup with shadcn/ui and folder structure`
 

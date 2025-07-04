@@ -1,12 +1,12 @@
 # Creator Score Miniapp - Modular File Structure
 
-This file structure reflects the **completed modular architecture** where UI components are pure (props-only) and all data fetching is handled by specialized hooks and services.
+This file structure reflects the **planned modular architecture** where UI components are pure (props-only) and all data fetching is handled by specialized hooks and services.
 
 ## Core Architecture Principles
 
 - **Pure UI Components**: All components in `components/` receive data via props only
 - **Centralized Data Fetching**: Custom hooks in `hooks/` handle all API calls and business logic
-- **Service Layer**: All external API interactions abstracted into `services/`
+- **Modular Service Layer**: External API interactions split into focused, single-responsibility services
 - **Shared Utilities**: Common functions and constants in `lib/`
 
 ```plaintext
@@ -28,7 +28,12 @@ creator-score-miniapp/
       page.tsx                   # Leaderboard - uses useLeaderboard* hooks
     settings/                    # Settings page
       page.tsx                   # Settings page (minimal)
-    old-prototype/               # Legacy components (to be removed)
+    services/                    # Modular service layer
+      types.ts                   # Shared interfaces and types
+      scoresService.ts           # Score-related functions (Builder/Creator scores)
+      credentialsService.ts      # Credential fetching and grouping
+      socialAccountsService.ts   # Social account data processing
+      leaderboardService.ts      # Leaderboard data and statistics
     layout.tsx                   # App layout with providers
     page.tsx                     # Root page (redirects to leaderboard)
     providers.tsx                # React context providers
@@ -71,13 +76,14 @@ creator-score-miniapp/
     useLeaderboard.ts            # Paginated leaderboard data
     useLeaderboardStats.ts       # Leaderboard statistics
     useProfileCreatorScore.ts    # User creator score and breakdown
+    useProfileCredentials.ts     # User credentials data
+    useProfileSocialAccounts.ts  # User social accounts
     useProfileTotalEarnings.ts   # ETH earnings calculation
     useUserCreatorScore.ts       # Current user's score with FID caching
     useUserNavigation.ts         # Navigation state and user context
 
-  services/                      # External API integration layer
+  services/                      # External API integration layer (modular)
     neynarService.ts             # Neynar/Farcaster API client
-    talentService.ts             # Talent Protocol API client
 
   lib/                           # Shared utilities and configuration
     constants.ts                 # App-wide constants (cache durations, etc.)
@@ -100,7 +106,7 @@ creator-score-miniapp/
 
   planning/                      # Documentation and planning
     architecture.md              # Core principles and patterns
-    migration-plan.md            # Completed migration documentation
+    development-guide.md         # Development guide and phases
     file-structure.md            # This file
     tasks.md                     # Development tasks
 
@@ -121,8 +127,17 @@ creator-score-miniapp/
 
 ### Data Flow Pattern
 ```
-External APIs → Services → Hooks → Components
+External APIs → Modular Services → Hooks → Components
 ```
+
+### Service Layer Architecture
+The service layer is designed as focused modules:
+
+- **types.ts**: All shared interfaces and constants
+- **scoresService.ts**: Builder/Creator score calculations and API calls
+- **credentialsService.ts**: Credential fetching and issuer grouping logic
+- **socialAccountsService.ts**: Social account data processing and normalization
+- **leaderboardService.ts**: Leaderboard data and statistics
 
 ### Hook Naming Convention
 - `useProfile*` - Profile-specific data (requires talentUUID)
@@ -144,11 +159,19 @@ External APIs → Services → Hooks → Components
 All hooks return: `{ data, loading, error }` consistently
 Components display errors using `Callout` component with graceful fallbacks
 
+## Service Layer Benefits
+
+The modular service architecture provides:
+- **Single Responsibility**: Each service handles one domain
+- **Easier Testing**: Isolated functions per domain
+- **Better Maintainability**: Clear separation of concerns
+- **Focused Development**: Work on specific domains independently
+
 ## File Organization Rules
 
 1. **Components**: Pure UI only, no business logic
 2. **Hooks**: All data fetching, caching, and business logic
-3. **Services**: External API abstractions
+3. **Services**: External API abstractions, modular by domain
 4. **Lib**: Shared utilities, constants, and configurations
 5. **Planning**: All documentation and architectural decisions
 
@@ -156,4 +179,5 @@ This structure enables:
 - **Fast development** with clear separation of concerns
 - **Easy testing** with isolated business logic
 - **Maintainable code** with consistent patterns
-- **Reusable components** across different contexts 
+- **Reusable components** across different contexts
+- **Focused modules** with single responsibilities 
