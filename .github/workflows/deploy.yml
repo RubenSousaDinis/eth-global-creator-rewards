@@ -31,7 +31,7 @@ jobs:
       run: npm run lint
 
     - name: Run type checking
-      run: npx tsc --noEmit
+      run: npx tsc --noEmit --project tsconfig.ci.json
 
   deploy:
     needs: test
