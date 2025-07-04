@@ -4,28 +4,16 @@ import { HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import * as React from "react";
 import Link from "next/link";
-
-interface NavItem {
-  label: string;
-  href?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  disabled?: boolean;
-}
+import { usePathname } from "next/navigation";
+import { useUserNavigation } from "@/hooks/useUserNavigation";
 
 interface HeaderProps {
-  navItems?: NavItem[];
   onInfoClick?: () => void;
 }
 
-export function Header({ navItems = [], onInfoClick }: HeaderProps) {
-  const [pathname, setPathname] = React.useState("/");
-
-  // Mock pathname for testing - in real app this would come from usePathname
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      setPathname(window.location.pathname);
-    }
-  }, []);
+export function Header({ onInfoClick }: HeaderProps) {
+  const pathname = usePathname();
+  const { navItems } = useUserNavigation();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white backdrop-blur supports-[backdrop-filter]:bg-white">

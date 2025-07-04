@@ -3,28 +3,12 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import * as React from "react";
+import { usePathname } from "next/navigation";
+import { useUserNavigation } from "@/hooks/useUserNavigation";
 
-interface NavItem {
-  label: string;
-  href?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  disabled?: boolean;
-}
-
-interface BottomNavProps {
-  navItems?: NavItem[];
-}
-
-export function BottomNav({ navItems = [] }: BottomNavProps) {
-  const [pathname, setPathname] = React.useState("/");
-
-  // Mock pathname for testing - in real app this would come from usePathname
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      setPathname(window.location.pathname);
-    }
-  }, []);
+export function BottomNav() {
+  const pathname = usePathname();
+  const { navItems } = useUserNavigation();
 
   return (
     <>
