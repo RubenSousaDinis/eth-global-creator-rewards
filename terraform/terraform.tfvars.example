@@ -1,0 +1,28 @@
+# Example terraform.tfvars file for custom domain configuration
+# Copy this file to terraform.tfvars and update the values
+
+# AWS Configuration
+aws_region = "eu-west-1"
+app_name   = "aws-deploy-test"
+environment = "production"
+
+# Custom Domain Configuration
+# Uncomment and set these values to use a custom domain
+# domain_name = "your-app.example.com"
+# hosted_zone = "example.com"
+
+# Database Configuration
+db_password = "your-secure-password-here"
+
+# NextAuth Configuration
+nextauth_secret = "your-nextauth-secret-here"
+
+# World App Configuration
+next_public_app_id = "your-world-app-id"
+
+# Tags
+tags = {
+  Environment = "production"
+  Project     = "aws-deploy-test"
+  Owner       = "your-name"
+} 
