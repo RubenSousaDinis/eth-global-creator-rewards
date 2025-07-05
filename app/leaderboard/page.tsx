@@ -44,6 +44,7 @@ export default function LeaderboardPage() {
     displayName: string;
     profileImage?: string;
     walletAddress: string;
+    talentProtocolId?: number;
   } | null>(null);
 
   // Countdown state
@@ -99,7 +100,7 @@ export default function LeaderboardPage() {
 
   // Find user entry in leaderboard data using resolved display name or wallet address
   const userLeaderboardEntry =
-    resolvedUser && entries.find(e => e.name === resolvedUser.displayName || e.wallet === resolvedUser.walletAddress);
+    resolvedUser && entries.find(e => e.talent_protocol_id === resolvedUser.talentProtocolId);
 
   // Show the user pinned at the top only if user is connected
   const pinnedUserEntry = resolvedUser && {
