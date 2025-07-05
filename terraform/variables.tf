@@ -138,6 +138,38 @@ variable "the_graph_api_key" {
   sensitive   = true
 }
 
+variable "talent_api_key" {
+  description = "Talent API key for talent protocol integration"
+  type        = string
+  sensitive   = true
+}
+
+variable "next_public_url" {
+  description = "Public URL for the application"
+  type        = string
+  default     = null
+}
+
+variable "next_public_onchainkit_project_name" {
+  description = "OnChainKit project name for the application"
+  type        = string
+  default     = "creator-rewards"
+}
+
+variable "redis_url" {
+  description = "Redis URL for caching"
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "redis_token" {
+  description = "Redis token for authentication"
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
 # OpenNext Configuration
 variable "open_next_prefix" {
   description = "Prefix for OpenNext resources (affects bucket and distribution names)"

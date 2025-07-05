@@ -198,10 +198,15 @@ module "open_next" {
       NEXT_PUBLIC_APP_ID = var.next_public_app_id
       NODE_ENV           = "production"
       NEXTAUTH_SECRET    = var.nextauth_secret
-      NEXTAUTH_URL       = var.domain_name != null ? "https://${var.domain_name}" : "https://drrlmb6jtrdvb.cloudfront.net"
+      NEXTAUTH_URL       = var.domain_name != null ? "https://${var.domain_name}" : var.next_public_url != null ? var.next_public_url : "https://drrlmb6jtrdvb.cloudfront.net"
       DATABASE_URL       = "postgresql://${var.db_username}:${var.db_password}@${aws_db_instance.database.endpoint}/${var.db_name}"
       NEYNAR_API_KEY     = var.neynar_api_key
       THE_GRAPH_API_KEY  = var.the_graph_api_key
+      TALENT_API_KEY     = var.talent_api_key
+      NEXT_PUBLIC_URL    = var.domain_name != null ? "https://${var.domain_name}" : var.next_public_url != null ? var.next_public_url : "https://drrlmb6jtrdvb.cloudfront.net"
+      NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME = var.next_public_onchainkit_project_name
+      REDIS_URL          = var.redis_url
+      REDIS_TOKEN        = var.redis_token
     }
   }
 

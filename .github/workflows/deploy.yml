@@ -121,6 +121,10 @@ jobs:
           TF_VAR_neynar_api_key: ${{ secrets.NEYNAR_API_KEY }}
           TF_VAR_the_graph_api_key: ${{ secrets.THE_GRAPH_API_KEY }}
           TF_VAR_talent_api_key: ${{ secrets.TALENT_API_KEY }}
+          TF_VAR_next_public_url: ${{ secrets.NEXT_PUBLIC_URL }}
+          TF_VAR_next_public_onchainkit_project_name: ${{ secrets.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME }}
+          TF_VAR_redis_url: ${{ secrets.REDIS_URL }}
+          TF_VAR_redis_token: ${{ secrets.REDIS_TOKEN }}
 
       - name: Get deployment URL and update environment
         id: get-url
