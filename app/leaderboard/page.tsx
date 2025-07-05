@@ -4,7 +4,7 @@ import { BottomNav } from "@/components/navigation/BottomNav";
 export default function LeaderboardPage() {
   return (
     <div className="min-h-screen bg-background">
-      <Header onInfoClick={() => console.log("Info clicked")} />
+      <Header />
 
       <main className="container mx-auto px-4 py-8 pb-20 md:pb-8">
         <div className="max-w-4xl mx-auto">

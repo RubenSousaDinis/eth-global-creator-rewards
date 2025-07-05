@@ -2,17 +2,17 @@ import { Header } from "@/components/navigation/Header";
 import { BottomNav } from "@/components/navigation/BottomNav";
 
 interface ProfilePageProps {
-  params: {
+  params: Promise<{
     identifier: string;
-  };
+  }>;
 }
 
-export default function ProfilePage({ params }: ProfilePageProps) {
-  const { identifier } = params;
+export default async function ProfilePage({ params }: ProfilePageProps) {
+  const { identifier } = await params;
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onInfoClick={() => console.log("Info clicked")} />
+      <Header />
 
       <main className="container mx-auto px-4 py-8 pb-20 md:pb-8">
         <div className="max-w-4xl mx-auto">
