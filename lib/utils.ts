@@ -197,6 +197,10 @@ export function formatK(num: number | string): string {
   return n.toString();
 }
 
+export function generateProfileUrl(identifier: string | number): string {
+  return `/${identifier}`;
+}
+
 export function truncateAddress(addr: string): string {
   if (!addr) return "";
   return addr.slice(0, 6) + "..." + addr.slice(-4);
