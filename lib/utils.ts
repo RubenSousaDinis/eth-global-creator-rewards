@@ -7,15 +7,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function filterEthAddresses(
-  addresses: (string | undefined | null)[],
-): string[] {
+export function filterEthAddresses(addresses: (string | undefined | null)[]): string[] {
   return addresses.filter(
     (addr): addr is string =>
-      typeof addr === "string" &&
-      addr.startsWith("0x") &&
-      addr.length === 42 &&
-      /^0x[a-fA-F0-9]{40}$/.test(addr),
+      typeof addr === "string" && addr.startsWith("0x") && addr.length === 42 && /^0x[a-fA-F0-9]{40}$/.test(addr)
   );
 }
 
@@ -61,18 +56,13 @@ export async function getEthUsdcPrice(): Promise<number> {
   const cacheKey = "eth_usdc_price";
 
   // Check cache first
-  const cachedPrice = getCachedData<number>(
-    cacheKey,
-    CACHE_DURATIONS.ETH_PRICE,
-  );
+  const cachedPrice = getCachedData<number>(cacheKey, CACHE_DURATIONS.ETH_PRICE);
   if (cachedPrice !== null && cachedPrice !== undefined) {
     return cachedPrice;
   }
 
   try {
-    const response = await fetch(
-      "https://api.coinbase.com/v2/prices/ETH-USD/spot",
-    );
+    const response = await fetch("https://api.coinbase.com/v2/prices/ETH-USD/spot");
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -138,7 +128,7 @@ export async function calculateTotalRewards(
       readable_value: string | null;
     }>;
   }>,
-  getEthUsdcPriceFn: () => Promise<number>,
+  getEthUsdcPriceFn: () => Promise<number>
 ): Promise<number> {
   const ethPrice = await getEthUsdcPriceFn();
 
@@ -197,8 +187,30 @@ export function formatK(num: number | string): string {
   return n.toString();
 }
 
-export function generateProfileUrl(identifier: string | number): string {
-  return `/${identifier}`;
+/**
+ * Generate profile URL from user data
+ */
+export function generateProfileUrl(params: {
+  farcasterHandle?: string | null;
+  githubHandle?: string | null;
+  profileId?: string | null;
+  talentId?: string | number | null;
+}): string | null {
+  const { farcasterHandle, githubHandle, profileId, talentId } = params;
+
+  if (farcasterHandle) {
+    return `/${farcasterHandle}`;
+  }
+  if (githubHandle) {
+    return `/${githubHandle}`;
+  }
+  if (profileId) {
+    return `/${profileId}`;
+  }
+  if (talentId) {
+    return `/${talentId}`;
+  }
+  return null;
 }
 
 export function truncateAddress(addr: string): string {
@@ -208,19 +220,11 @@ export function truncateAddress(addr: string): string {
 
 export function shouldShowUom(uom: string | null): boolean {
   if (!uom) return false;
-  const hiddenUoms = [
-    "creation date",
-    "out transactions",
-    "followers",
-    "stack points",
-  ];
+  const hiddenUoms = ["creation date", "out transactions", "followers", "stack points"];
   return !hiddenUoms.includes(uom);
 }
 
-export function formatReadableValue(
-  value: string | null,
-  uom: string | null = null,
-): string {
+export function formatReadableValue(value: string | null, uom: string | null = null): string {
   if (!value) return "";
   if (/[a-zA-Z]/.test(value)) return value;
   const num = parseFloat(value);
@@ -241,9 +245,7 @@ export function formatReadableValue(
 export function cleanCredentialLabel(label: string, issuer: string): string {
   // Remove the issuer name from the beginning of the label if it exists
   const issuerPrefix = `${issuer} `;
-  return label.startsWith(issuerPrefix)
-    ? label.slice(issuerPrefix.length)
-    : label;
+  return label.startsWith(issuerPrefix) ? label.slice(issuerPrefix.length) : label;
 }
 
 // Generic caching utility
@@ -280,7 +282,7 @@ export function setCachedData<T>(key: string, data: T): void {
   try {
     const cachedData: CachedData<T> = {
       data,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     };
     localStorage.setItem(key, JSON.stringify(cachedData));
   } catch {
@@ -292,7 +294,28 @@ export function setCachedData<T>(key: string, data: T): void {
 export const CACHE_DURATIONS = {
   PROFILE_DATA: 5 * 60 * 1000, // 5 minutes
   SCORE_BREAKDOWN: 30 * 60 * 1000, // 30 minutes (until profile updates)
-  ETH_PRICE: 24 * 60 * 60 * 1000, // 24 hours
+  ETH_PRICE: 24 * 60 * 60 * 1000 // 24 hours
 } as const;
 
 export { resolveTalentUser } from "./user-resolver";
+
+/**
+ * Open external URL with SDK fallback
+ */
+export async function openExternalUrl(url: string): Promise<void> {
+  try {
+    const { sdk } = await import("@farcaster/frame-sdk");
+    await sdk.actions.openUrl(url);
+  } catch (error) {
+    console.error("Failed to open external URL:", error);
+    // Fallback to regular link if SDK fails
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+}
+
+/**
+ * Calculate total followers from social accounts
+ */
+export function calculateTotalFollowers(socialAccounts: Array<{ followerCount?: number | null }>): number {
+  return socialAccounts.reduce((sum, acc) => sum + (acc.followerCount ?? 0), 0);
+}

@@ -1,37 +1,61 @@
-import { Header } from "@/components/navigation/Header";
-import { BottomNav } from "@/components/navigation/BottomNav";
-import { DeployedPosts } from "@/components/DeployedPosts";
+import { ProfileScreen } from "@/components/profile/ProfileScreen";
+import { resolveTalentUser } from "@/lib/user-resolver";
+import { redirect } from "next/navigation";
 
-interface ProfilePageProps {
-  params: Promise<{
-    identifier: string;
-  }>;
-}
+// List of reserved words that cannot be used as profile identifiers
+const RESERVED_WORDS = [
+  "api",
+  "settings",
+  "leaderboard",
+  "profile",
+  "services",
+  ".well-known",
+  "favicon.ico",
+  "robots.txt",
+  "sitemap.xml",
+  // Recommended additions
+  "login",
+  "logout",
+  "register",
+  "signup",
+  "signin",
+  "auth",
+  "admin",
+  "dashboard",
+  "home",
+  "explore",
+  "notifications",
+  "messages",
+  "search",
+  "help",
+  "support",
+  "terms",
+  "privacy",
+  "about",
+  "contact",
+  "static",
+  "public",
+  "assets"
+  // Add more as needed
+];
 
-export default async function ProfilePage({ params }: ProfilePageProps) {
+export default async function PublicProfilePage({ params }: { params: Promise<{ identifier: string }> }) {
+  // Await params in Next.js 15
   const { identifier } = await params;
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container mx-auto px-4 py-8 pb-20 md:pb-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="text-center space-y-6">
-            <h1 className="text-4xl font-bold tracking-tight">Profile</h1>
-            <p className="text-xl text-muted-foreground">@{identifier}</p>
-            <div className="text-sm text-muted-foreground">
-              <p>Identifier: {identifier}</p>
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <DeployedPosts walletAddress={identifier} />
-          </div>
-        </div>
-      </main>
-
-      <BottomNav />
-    </div>
-  );
+  if (RESERVED_WORDS.includes(identifier)) {
+    return null;
+  }
+  // Show loading spinner while resolving user
+  const userPromise = resolveTalentUser(identifier);
+  const user = await userPromise;
+  if (!user || !user.id) {
+    return <div className="p-8 text-center text-destructive">User not found</div>;
+  }
+  // Determine canonical human-readable identifier: Farcaster, then Github, else UUID
+  const canonical = user.fname || user.github || user.id;
+  if (canonical && identifier !== canonical && identifier !== undefined) {
+    redirect(`/${canonical}`);
+  }
+  return <ProfileScreen talentUUID={user.id} />;
 }

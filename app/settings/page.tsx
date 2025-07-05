@@ -1,9 +1,6 @@
 "use client";
 
-import { Header } from "@/components/navigation/Header";
-import { BottomNav } from "@/components/navigation/BottomNav";
-import { SelfAppBuilder } from "@selfxyz/qrcode";
-import SelfQRcodeWrapper from "@selfxyz/qrcode";
+import { SelfQRcodeWrapper, SelfAppBuilder } from "@selfxyz/qrcode";
 import { v4 as uuidv4 } from "uuid";
 
 const userId = uuidv4();
@@ -28,32 +25,27 @@ const selfApp = new SelfAppBuilder({
 
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container mx-auto px-4 py-8 pb-20 md:pb-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center space-y-6">
-            <h1 className="text-4xl font-bold tracking-tight">Settings</h1>
-            <p className="text-xl text-muted-foreground">Configure your Creator Score preferences</p>
-            <div className="text-sm text-muted-foreground">
-              <p>🚧 Coming soon: Settings configuration options</p>
-            </div>
-            <div className="flex flex-col items-center justify-center">
-              <h2 className="text-2xl font-bold tracking-tight pb-5">Self Verification</h2>
-              <SelfQRcodeWrapper
-                selfApp={selfApp}
-                onSuccess={() => {
-                  console.log("Verification successful");
-                  // Perform actions after successful verification
-                }}
-              />
-            </div>
-          </div>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="text-center space-y-6">
+        <h1 className="text-4xl font-bold tracking-tight">Settings</h1>
+        <p className="text-xl text-muted-foreground">Configure your Creator Score preferences</p>
+        <div className="text-sm text-muted-foreground">
+          <p>🚧 Coming soon: Settings configuration options</p>
         </div>
-      </main>
-
-      <BottomNav />
+        <div className="flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-bold tracking-tight pb-5">Self Verification</h2>
+          <SelfQRcodeWrapper
+            selfApp={selfApp}
+            onSuccess={() => {
+              console.log("Verification successful");
+              // Perform actions after successful verification
+            }}
+            onError={error => {
+              console.error("Verification failed:", error);
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
