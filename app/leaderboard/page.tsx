@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
+import { VerifiedAvatar } from "@/components/ui/VerifiedAvatar";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { getUserContext } from "@/lib/user-context";
@@ -202,7 +202,12 @@ export default function LeaderboardPage() {
             onClick={handlePinnedUserClick}
           >
             <span className="text-sm font-medium w-6">#{pinnedUserEntry.rank}</span>
-            <Avatar src={pinnedUserEntry.pfp} fallback={pinnedUserEntry.name[0]} size="md" />
+            <VerifiedAvatar
+              src={pinnedUserEntry.pfp}
+              fallback={pinnedUserEntry.name[0]}
+              size="md"
+              walletAddress={resolvedUser?.walletAddress}
+            />
             <div className="flex-1">
               <p className="font-medium text-sm">{pinnedUserEntry.name}</p>
               <p className="text-xs text-gray-600">Creator Score: {pinnedUserEntry.score}</p>
@@ -221,7 +226,7 @@ export default function LeaderboardPage() {
                 onClick={() => handleEntryClick(user)}
               >
                 <span className="text-sm font-medium w-6">#{user.rank}</span>
-                <Avatar src={user.pfp} fallback={user.name[0]} size="md" />
+                <VerifiedAvatar src={user.pfp} fallback={user.name[0]} size="md" />
                 <div className="flex-1">
                   <p className="font-medium text-sm">{user.name}</p>
                   <p className="text-xs text-gray-600">Creator Score: {user.score}</p>
