@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { getUserContext, type UnifiedUserContext } from "@/lib/user-context";
-import { User, Trophy, Settings } from "lucide-react";
+import { User, Trophy, Settings, Rss } from "lucide-react";
 
 export function useUserNavigation() {
   const { context } = useMiniKit();
@@ -23,6 +23,13 @@ export function useUserNavigation() {
   // Navigation items are ALWAYS enabled - auth is handled at the click level
   const navItems = useMemo(
     () => [
+      {
+        href: "/feed",
+        icon: Rss,
+        label: "Feed",
+        disabled: false,
+        requiresAuth: false
+      },
       {
         href: canonical ? `/${canonical}` : "/profile",
         icon: User,

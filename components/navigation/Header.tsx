@@ -7,13 +7,13 @@ import { usePathname } from "next/navigation";
 import { useUserNavigation } from "@/hooks/useUserNavigation";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 
-interface HeaderProps {
-  onInfoClick?: () => void;
-}
+// interface HeaderProps {
+//   onInfoClick?: () => void;
+// }
 
-export function Header({ onInfoClick }: HeaderProps) {
+export function Header() {
   const pathname = usePathname();
-  const { navItems, user } = useUserNavigation();
+  const { navItems } = useUserNavigation();
   const { primaryWallet, setShowAuthFlow, handleLogOut } = useDynamicContext();
 
   // User is logged in if they have primaryWallet (connected) - no signing required

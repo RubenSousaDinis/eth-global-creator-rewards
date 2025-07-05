@@ -2,12 +2,12 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useUserNavigation } from "@/hooks/useUserNavigation";
-import { DynamicWidget } from "@dynamic-labs/sdk-react-core";
+// import { useUserNavigation } from "@/hooks/useUserNavigation";
+// import { DynamicWidget } from "@dynamic-labs/sdk-react-core";
 
 export default function App() {
   const router = useRouter();
-  const { canonical, user } = useUserNavigation();
+  // const { canonical, user } = useUserNavigation();
 
   useEffect(() => {
     // Always redirect to leaderboard

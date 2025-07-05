@@ -1,4 +1,4 @@
-import { SelfBackendVerifier, InMemoryConfigStore, AllIds, DefaultConfigStore } from "@selfxyz/core";
+import { SelfBackendVerifier, AllIds, DefaultConfigStore } from "@selfxyz/core";
 import { NextRequest, NextResponse } from "next/server";
 import { BigNumberish } from "ethers";
 

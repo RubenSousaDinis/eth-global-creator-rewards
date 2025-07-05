@@ -50,13 +50,13 @@ export default function SettingsPage() {
               </CardTitle>
               <CardDescription>
                 <strong>Verification is required to receive Rewards.</strong> Verify your identity using Self to prove
-                you're a real person and unlock the weekly rewards.
+                you&apos;re a real person and unlock the weekly rewards.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="flex-1">
-                  <p className="text-sm text-muted-foreground mb-2">What you'll get after verification:</p>
+                  <p className="text-sm text-muted-foreground mb-2">What you&apos;ll get after verification:</p>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Access to Creator Rewards airdrops</li>
                     <li>• Verified creator badge</li>
