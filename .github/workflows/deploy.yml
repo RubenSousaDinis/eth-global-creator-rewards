@@ -2,7 +2,7 @@ name: Deploy to AWS
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix-missing-domain]
 
 env:
   NODE_VERSION: "20"

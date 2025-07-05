@@ -13,7 +13,7 @@ variable "app_name" {
 variable "domain_name" {
   description = "Custom domain name for the application (optional)"
   type        = string
-  default     = null
+  default     = "cannes.creatorscore.app"
 }
 
 variable "hosted_zone" {
@@ -91,17 +91,17 @@ variable "db_password" {
   description = "Database master password"
   type        = string
   sensitive   = true
-  
+
   validation {
     condition     = length(var.db_password) >= 8 && length(var.db_password) <= 41
     error_message = "Database password must be between 8 and 41 characters long."
   }
-  
+
   validation {
     condition     = can(regex(".*[A-Z].*", var.db_password)) && can(regex(".*[a-z].*", var.db_password)) && can(regex(".*[0-9].*", var.db_password))
     error_message = "Database password must contain at least one uppercase letter, one lowercase letter, and one number."
   }
-  
+
   validation {
     condition     = !can(regex("[\\/@\" ]", var.db_password))
     error_message = "Database password cannot contain '/', '@', '\"', or spaces. Only printable ASCII characters are allowed."
@@ -150,5 +150,3 @@ variable "open_next_folder_path" {
   type        = string
   default     = "../.open-next"
 }
-
- 
