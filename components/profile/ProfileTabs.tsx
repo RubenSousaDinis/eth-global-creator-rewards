@@ -75,7 +75,7 @@ export function ProfileTabs({ accountsCount, socialAccounts, talentUUID }: Profi
         </TabsTrigger>
       </TabsList>
       <TabsContent value="content" className="mt-6 p-2">
-        <DeployedPosts walletAddress={talentUUID} />
+        <DeployedPosts talentIdentifier={talentUUID} />
       </TabsContent>
       <TabsContent value="accounts" className="mt-6 p-2">
         <AccountGrid socialAccounts={socialAccounts} />

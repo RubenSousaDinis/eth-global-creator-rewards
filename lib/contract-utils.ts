@@ -18,6 +18,17 @@ const CONTRACT_URI_ABI = [
   }
 ] as const;
 
+// ABI for the description function (used by Mirror posts)
+const DESCRIPTION_ABI = [
+  {
+    type: "function",
+    name: "description",
+    inputs: [],
+    outputs: [{ type: "string" }],
+    stateMutability: "view"
+  }
+] as const;
+
 // Function to get contract URI from a contract address
 export async function getContractURI(contractAddress: string): Promise<string | null> {
   try {
@@ -30,6 +41,22 @@ export async function getContractURI(contractAddress: string): Promise<string | 
     return contractURI;
   } catch (error) {
     console.error("Error fetching contractURI:", error);
+    return null;
+  }
+}
+
+// Function to get description from a contract address (used by Mirror posts)
+export async function getContractDescription(contractAddress: string): Promise<string | null> {
+  try {
+    const description = await publicClient.readContract({
+      address: contractAddress as `0x${string}`,
+      abi: DESCRIPTION_ABI,
+      functionName: "description"
+    });
+
+    return description;
+  } catch (error) {
+    console.error("Error fetching description:", error);
     return null;
   }
 }
@@ -116,4 +143,19 @@ export async function getParagraphPostUrl(contractAddress: string): Promise<stri
 
   // Extract the external_link field from the metadata
   return metadata.external_link || null;
+}
+
+// Combined function to get Mirror post URL from contract address
+export async function getMirrorPostUrl(contractAddress: string): Promise<string | null> {
+  const description = await getContractDescription(contractAddress);
+  return description;
+}
+
+// Generic function to get post URL based on post type
+export async function getPostUrl(contractAddress: string, postType: "paragraph" | "mirror"): Promise<string | null> {
+  if (postType === "mirror") {
+    return await getMirrorPostUrl(contractAddress);
+  } else {
+    return await getParagraphPostUrl(contractAddress);
+  }
 }
