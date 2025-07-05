@@ -200,6 +200,7 @@ module "open_next" {
       NEXTAUTH_SECRET    = var.nextauth_secret
       NEXTAUTH_URL       = var.domain_name != null ? "https://${var.domain_name}" : "https://drrlmb6jtrdvb.cloudfront.net"
       DATABASE_URL       = "postgresql://${var.db_username}:${var.db_password}@${aws_db_instance.database.endpoint}/${var.db_name}"
+      NEYNAR_API_KEY     = var.neynar_api_key
     }
   }
 

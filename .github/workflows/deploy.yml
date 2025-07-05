@@ -77,6 +77,7 @@ jobs:
         env:
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          NEYNAR_API_KEY: ${{ secrets.NEYNAR_API_KEY }}
 
       - name: Verify OpenNext build output
         run: |
@@ -115,6 +116,7 @@ jobs:
         env:
           TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
           TF_VAR_nextauth_secret: ${{ secrets.NEXTAUTH_SECRET }}
+          TF_VAR_neynar_api_key: ${{ secrets.NEYNAR_API_KEY }}
 
       - name: Get deployment URL and update environment
         id: get-url

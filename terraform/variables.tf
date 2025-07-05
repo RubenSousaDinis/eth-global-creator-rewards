@@ -126,6 +126,12 @@ variable "nextauth_secret" {
   sensitive   = true
 }
 
+variable "neynar_api_key" {
+  description = "Neynar API key for Farcaster integration"
+  type        = string
+  sensitive   = true
+}
+
 # OpenNext Configuration
 variable "open_next_prefix" {
   description = "Prefix for OpenNext resources (affects bucket and distribution names)"
