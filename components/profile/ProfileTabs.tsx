@@ -15,22 +15,31 @@ interface ProfileTabsProps {
   talentUUID: string;
 }
 
-export function ProfileTabs({
-  accountsCount,
-  socialAccounts,
-  talentUUID,
-}: ProfileTabsProps) {
+export function ProfileTabs({ accountsCount, socialAccounts, talentUUID }: ProfileTabsProps) {
   const { credentials } = useProfileCredentials(talentUUID);
 
   // Calculate credentials count from the hook data
   const credentialsCount = credentials.reduce(
     (sum: number, issuer: IssuerCredentialGroup) => sum + issuer.points.length,
-    0,
+    0
   );
 
   return (
-    <Tabs defaultValue="accounts" className="w-full flex flex-col">
+    <Tabs defaultValue="content" className="w-full flex flex-col">
       <TabsList className="w-full justify-start bg-transparent p-0 h-auto gap-6">
+        <TabsTrigger
+          value="content"
+          className={cn(
+            "relative px-0 py-2 text-base font-medium",
+            "data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+            "data-[state=active]:text-foreground data-[state=active]:after:absolute",
+            "data-[state=active]:after:bottom-0 data-[state=active]:after:left-0",
+            "data-[state=active]:after:right-0 data-[state=active]:after:h-0.5",
+            "data-[state=active]:after:bg-primary"
+          )}
+        >
+          Content
+        </TabsTrigger>
         <TabsTrigger
           value="accounts"
           className={cn(
@@ -39,14 +48,11 @@ export function ProfileTabs({
             "data-[state=active]:text-foreground data-[state=active]:after:absolute",
             "data-[state=active]:after:bottom-0 data-[state=active]:after:left-0",
             "data-[state=active]:after:right-0 data-[state=active]:after:h-0.5",
-            "data-[state=active]:after:bg-primary",
+            "data-[state=active]:after:bg-primary"
           )}
         >
           Accounts
-          <Badge
-            variant="secondary"
-            className="ml-2 bg-muted text-muted-foreground"
-          >
+          <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">
             {accountsCount}
           </Badge>
         </TabsTrigger>
@@ -58,18 +64,18 @@ export function ProfileTabs({
             "data-[state=active]:text-foreground data-[state=active]:after:absolute",
             "data-[state=active]:after:bottom-0 data-[state=active]:after:left-0",
             "data-[state=active]:after:right-0 data-[state=active]:after:h-0.5",
-            "data-[state=active]:after:bg-primary",
+            "data-[state=active]:after:bg-primary"
           )}
         >
           Credentials
-          <Badge
-            variant="secondary"
-            className="ml-2 bg-muted text-muted-foreground"
-          >
+          <Badge variant="secondary" className="ml-2 bg-muted text-muted-foreground">
             {credentialsCount}
           </Badge>
         </TabsTrigger>
       </TabsList>
+      <TabsContent value="content" className="mt-6 p-2">
+        {/* Empty content for now */}
+      </TabsContent>
       <TabsContent value="accounts" className="mt-6 p-2">
         <AccountGrid socialAccounts={socialAccounts} />
       </TabsContent>
