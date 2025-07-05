@@ -10,13 +10,14 @@ External APIs → Services → Hooks → Pure UI Components
 
 ## Development Strategy
 
-**Order of Operations**: Foundation → Navigation → Leaderboard → Profile → Integration
+**Order of Operations**: Foundation ✅ → Navigation ✅ → Leaderboard ✅ → Profile → Integration
 **Commit Strategy**: One commit per component with descriptive messages that tell the story
 
 ## Project Context
 
 ### Current State
 - **Base**: Started with Base Minikit (Next.js bootstrap) 
+- **Progress**: Completed foundation, navigation, and leaderboard system
 - **Target**: Modular architecture with pure UI components and centralized data fetching
 
 ### Architecture Principles
@@ -107,7 +108,7 @@ External APIs → Services → Hooks → Pure UI Components
 
 **Commit**: `feat: add simple test pages for navigation routes`
 
-## Phase 3: Leaderboard System
+## Phase 3: Leaderboard System ✅ COMPLETED
 
 ### 3.1 LeaderboardRow Component ✅
 **Goal**: Create individual leaderboard entry component
@@ -119,19 +120,20 @@ External APIs → Services → Hooks → Pure UI Components
 
 **Commit**: `feat: add LeaderboardRow component for individual entries`
 
-### 3.2 Leaderboard Data Hooks
+### 3.2 Leaderboard Data Hooks ✅
 **Goal**: Create leaderboard data fetching hooks
 
 **Hooks**:
 - `hooks/useLeaderboard.ts` - Paginated leaderboard data
 - `hooks/useLeaderboardStats.ts` - Leaderboard statistics
 - `hooks/useUserCreatorScore.ts` - Current user's score
+- `hooks/useProfileCreatorScore.ts` - Profile-specific creator score
 
 **Pattern**: All return `{data, loading, error}` interface
 
 **Commit**: `feat: add leaderboard data hooks`
 
-### 3.3 Leaderboard Page
+### 3.3 Leaderboard Page ✅
 **Goal**: Create leaderboard page using hooks
 
 **Page**: `app/leaderboard/page.tsx`
@@ -141,14 +143,39 @@ External APIs → Services → Hooks → Pure UI Components
 
 **Commit**: `feat: add leaderboard page with hook integration`
 
-### 3.4 Services Integration
+### 3.4 Services Integration ✅
 **Goal**: Connect hooks to actual API services
 
 **Services**:
-- `services/talentService.ts` - Talent Protocol API
-- `services/neynarService.ts` - Neynar/Farcaster API
+- `app/services/neynarService.ts` - Neynar/Farcaster API
+- `app/services/scoresService.ts` - Creator score calculations
+- `app/services/leaderboardService.ts` - Leaderboard data aggregation
+- `app/services/socialAccountsService.ts` - Social platform integration
+- `app/services/types.ts` - Type definitions
 
-**Commit**: `feat: integrate leaderboard hooks with API services`
+**API Routes**:
+- `app/api/leaderboard/route.ts` - Leaderboard API endpoint
+
+**Commit**: `feat: Add leaderboard functionality with creator scores and services`
+
+### 3.5 Leaderboard UX Optimization ✅
+**Goal**: Remove drawer complexity and implement direct navigation for better MiniApp UX
+
+**Changes**:
+- Remove MinimalProfileDrawer component and state management
+- Add `generateProfileUrl` utility for consistent profile routing
+- Replace drawer handlers with direct `router.push()` calls
+- Simplify click handlers for single-click navigation
+- Eliminate complex drawer state (`drawerOpen`, `selectedProfile`)
+
+**Results**:
+- Bundle size reduction: 23% smaller (4.1kB → 3.17kB)
+- UX improvement: Single-click navigation instead of preview → navigate flow
+- Code simplification: Eliminated complex drawer state management
+- Better MiniApp patterns: Direct navigation aligns with Farcaster MiniApp best practices
+- Architecture impact: Cleaner component tree, reduced complexity
+
+**Commit**: `refactor: remove MinimalProfileDrawer complexity and implement direct navigation`
 
 ## Phase 4: Profile System
 
@@ -302,6 +329,11 @@ export async function fetchUserProfile(uuid: string): Promise<User> {
 - ✅ Proper loading states
 - ✅ Responsive design
 - ✅ Clean commit history that tells the story
+- ✅ Foundation setup completed
+- ✅ Navigation system implemented
+- ✅ Leaderboard system fully functional
+- ⏳ Profile system (next phase)
+- ⏳ Integration & polish (final phase)
 
 ## Final Notes
 

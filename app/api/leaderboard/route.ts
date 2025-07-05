@@ -18,7 +18,10 @@ export async function GET(req: NextRequest) {
   }
   const { searchParams } = req.nextUrl;
   const page = parseInt(searchParams.get("page") || "1", 10);
-  const perPage = parseInt(searchParams.get("perPage") || "25", 10); // Use max allowed 25
+  const perPage = parseInt(
+    searchParams.get("per_page") || searchParams.get("perPage") || "25",
+    10,
+  ); // Use max allowed 25
   const statsOnly = searchParams.get("statsOnly") === "true";
 
   const baseUrl = "https://api.talentprotocol.com/search/advanced/profiles";
