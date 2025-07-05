@@ -1,7 +1,7 @@
 // Development configuration
 // NOTE: This port must match the --port value in package.json's "dev" script
 // When changing this port, also update package.json's dev script
-export const DEV_PORT = 3000;
+export const DEV_PORT = 3002;
 
 /**
  * Get the local development URL, respecting the configured port
