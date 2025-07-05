@@ -58,6 +58,10 @@ resource "aws_security_group" "database" {
   }
 
   tags = var.tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Security group for Lambda functions
@@ -73,6 +77,10 @@ resource "aws_security_group" "lambda" {
   }
 
   tags = var.tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Subnet group for RDS
@@ -81,6 +89,10 @@ resource "aws_db_subnet_group" "database" {
   subnet_ids = module.vpc.private_subnets
 
   tags = var.tags
+
+  depends_on = [
+    module.vpc
+  ]
 }
 
 # PostgreSQL RDS instance
@@ -102,6 +114,7 @@ resource "aws_db_instance" "database" {
 
   vpc_security_group_ids = [aws_security_group.database.id]
   db_subnet_group_name   = aws_db_subnet_group.database.name
+  parameter_group_name   = aws_db_parameter_group.database.name
 
   backup_retention_period = 7
   backup_window          = "03:00-04:00"
@@ -112,6 +125,19 @@ resource "aws_db_instance" "database" {
   deletion_protection = var.environment == "production"
 
   tags = var.tags
+
+  depends_on = [
+    aws_db_subnet_group.database,
+    aws_security_group.database,
+    aws_db_parameter_group.database
+  ]
+
+  lifecycle {
+    prevent_destroy = false
+    ignore_changes = [
+      final_snapshot_identifier
+    ]
+  }
 }
 
 # Parameter group for PostgreSQL
@@ -130,6 +156,10 @@ resource "aws_db_parameter_group" "database" {
   }
 
   tags = var.tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # OpenNext module for Next.js deployment
