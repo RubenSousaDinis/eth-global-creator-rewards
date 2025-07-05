@@ -93,6 +93,13 @@ resource "aws_db_subnet_group" "database" {
   depends_on = [
     module.vpc
   ]
+
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = [
+      name  # Prevent recreation due to name changes
+    ]
+  }
 }
 
 # PostgreSQL RDS instance
@@ -159,6 +166,18 @@ resource "aws_db_parameter_group" "database" {
 
   lifecycle {
     create_before_destroy = true
+  }
+}
+
+# Null resource to ensure proper destruction order
+resource "null_resource" "db_cleanup" {
+  depends_on = [
+    aws_db_instance.database
+  ]
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "echo 'Database cleanup - ensuring proper destruction order'"
   }
 }
 
