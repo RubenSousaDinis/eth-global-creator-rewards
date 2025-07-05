@@ -7,7 +7,7 @@ This file structure reflects the **completed modular architecture** where UI com
 - **Pure UI Components**: All components in `components/` receive data via props only
 - **Centralized Data Fetching**: Custom hooks in `hooks/` handle all API calls and business logic
 - **Modular Service Layer**: External API interactions split into focused, single-responsibility services
-- **MiniApp Authentication**: User context provided automatically via MiniKit (no separate auth needed)
+- **Dual Authentication**: Automatic environment detection enables Farcaster authentication (MiniApp) and Dynamic wallet authentication (browser) with unified user context
 - **Shared Utilities**: Common functions and constants in `lib/`
 
 ```plaintext
@@ -35,8 +35,8 @@ creator-score-miniapp/
       socialAccountsService.ts   # Social account data processing
       leaderboardService.ts      # Leaderboard data and statistics
     layout.tsx                   # App layout with providers
-    page.tsx                     # Root page (redirects to leaderboard)
-    providers.tsx                # React context providers
+    page.tsx                     # Root page with Dynamic authentication UI
+    providers.tsx                # React context providers (MiniKit + Dynamic integration)
     globals.css                  # Global styles
     theme.css                    # Theme customizations
 
@@ -96,7 +96,7 @@ creator-score-miniapp/
     notification.ts              # Notification helpers
     redis.ts                     # Redis caching utilities
     total-earnings-config.ts     # Total earnings calculation configuration
-    user-context.ts              # User context utilities
+    user-context.ts              # Unified user context utilities (Farcaster + Dynamic)
     user-resolver.ts             # Universal user identifier resolution
     utils.ts                     # Utility functions (formatting, validation)
 
@@ -132,8 +132,14 @@ creator-score-miniapp/
 
 ### Data Flow Pattern
 ```
-MiniKit Context (User Auth) → External APIs → API Clients (lib/) → Modular Services → API Routes → Hooks → Components
+Unified Auth Context (Farcaster + Dynamic) → External APIs → API Clients (lib/) → Modular Services → API Routes → Hooks → Components
 ```
+
+### Authentication Architecture
+- **Environment Detection**: Automatic detection of Farcaster MiniApp vs. browser contexts
+- **Unified User Context**: Single abstraction layer supporting both Farcaster and Dynamic authentication
+- **Wallet-only Authentication**: Dynamic configured for existing wallets only (no embedded/smart wallets)
+- **Universal Identification**: Wallet addresses serve as universal identifiers across contexts
 
 ### Critical Architecture Rule: Client-Server Separation
 
