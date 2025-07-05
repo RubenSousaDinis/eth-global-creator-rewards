@@ -30,11 +30,55 @@ function isFarcasterEnvironment(): boolean {
 }
 
 /**
+ * Type guard to check if object has address property
+ */
+function hasAddress(obj: unknown): obj is { address: string } {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    "address" in obj &&
+    typeof (obj as Record<string, unknown>).address === "string"
+  );
+}
+
+/**
+ * Extract wallet address from Dynamic user/wallet object
+ */
+function extractWalletAddress(obj: unknown): string | undefined {
+  if (!obj || typeof obj !== "object") return undefined;
+
+  const typedObj = obj as Record<string, unknown>;
+
+  // Try different property paths where wallet address might be stored
+  if (hasAddress(typedObj)) {
+    return typedObj.address;
+  }
+
+  if (typeof typedObj.publicKey === "string") {
+    return typedObj.publicKey;
+  }
+
+  if (typeof typedObj.walletPublicKey === "string") {
+    return typedObj.walletPublicKey;
+  }
+
+  // Check verifiedCredentials array
+  if (Array.isArray(typedObj.verifiedCredentials) && typedObj.verifiedCredentials.length > 0) {
+    const firstCredential = typedObj.verifiedCredentials[0];
+    if (hasAddress(firstCredential)) {
+      return firstCredential.address;
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * Get unified user context from both Farcaster and Dynamic sources
  */
 export function getUserContext(
   farcasterContext: { user?: FarcasterUserContext } | null,
-  dynamicWalletOrUser: any,
+  dynamicWalletOrUser: unknown,
   isDynamicAuthenticated: boolean
 ): UnifiedUserContext | undefined {
   // Priority 1: Farcaster context (when in Farcaster environment)
@@ -52,13 +96,11 @@ export function getUserContext(
   if (isDynamicAuthenticated && dynamicWalletOrUser) {
     let walletAddress: string | undefined;
 
-    // Handle different Dynamic object structures
-    if (dynamicWalletOrUser.address) {
-      walletAddress = dynamicWalletOrUser.address;
-    } else if (dynamicWalletOrUser.publicKey) {
-      walletAddress = dynamicWalletOrUser.publicKey;
-    } else if (typeof dynamicWalletOrUser === "string") {
+    // Handle different input types
+    if (typeof dynamicWalletOrUser === "string") {
       walletAddress = dynamicWalletOrUser;
+    } else {
+      walletAddress = extractWalletAddress(dynamicWalletOrUser);
     }
 
     if (walletAddress) {
