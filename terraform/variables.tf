@@ -132,6 +132,12 @@ variable "neynar_api_key" {
   sensitive   = true
 }
 
+variable "the_graph_api_key" {
+  description = "The Graph API key for subgraph queries"
+  type        = string
+  sensitive   = true
+}
+
 # OpenNext Configuration
 variable "open_next_prefix" {
   description = "Prefix for OpenNext resources (affects bucket and distribution names)"

@@ -20,6 +20,9 @@ nextauth_secret = "your-nextauth-secret-here"
 # Neynar Configuration
 neynar_api_key = "your-neynar-api-key-here"
 
+# The Graph Configuration
+the_graph_api_key = "your-the-graph-api-key-here"
+
 # World App Configuration
 next_public_app_id = "your-world-app-id"
 
