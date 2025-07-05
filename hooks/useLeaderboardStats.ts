@@ -2,75 +2,66 @@
 
 import { useState, useEffect } from "react";
 import { getLeaderboardStats } from "@/app/services/leaderboardService";
+import { getCachedData, setCachedData, CACHE_DURATIONS } from "@/lib/utils";
 
 interface LeaderboardStats {
   minScore: number | null;
   totalCreators: number;
 }
 
-interface UseLeaderboardStatsReturn {
-  data: LeaderboardStats | null;
-  loading: boolean;
-  error: string | null;
-  refresh: () => void;
-}
-
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-let cache: { data: LeaderboardStats; timestamp: number } | null = null;
-
-export function useLeaderboardStats(): UseLeaderboardStatsReturn {
-  const [data, setData] = useState<LeaderboardStats | null>(null);
+export function useLeaderboardStats() {
+  const [stats, setStats] = useState<LeaderboardStats>({
+    minScore: null,
+    totalCreators: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchLeaderboardStats = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  useEffect(() => {
+    async function fetchStats() {
+      const cacheKey = "leaderboard_stats";
 
       // Check cache first
-      if (cache && Date.now() - cache.timestamp < CACHE_TTL) {
-        setData(cache.data);
+      const cachedStats = getCachedData<LeaderboardStats>(
+        cacheKey,
+        CACHE_DURATIONS.PROFILE_DATA, // 5 minute cache for stats
+      );
+
+      if (cachedStats) {
+        setStats(cachedStats);
         setLoading(false);
         return;
       }
 
-      // Fetch fresh data
-      const statsData = await getLeaderboardStats();
+      setLoading(true);
+      setError(null);
 
-      // Cache the result
-      cache = {
-        data: statsData,
-        timestamp: Date.now(),
-      };
+      try {
+        const data = await getLeaderboardStats();
+        const newStats = {
+          minScore: data.minScore,
+          totalCreators: data.totalCreators,
+        };
 
-      setData(statsData);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to fetch leaderboard stats",
-      );
-      setData(null);
-    } finally {
-      setLoading(false);
+        setStats(newStats);
+
+        // Cache the stats
+        setCachedData(cacheKey, newStats);
+      } catch (err) {
+        console.error("Error fetching leaderboard stats:", err);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch leaderboard stats",
+        );
+        setStats({ minScore: null, totalCreators: 0 });
+      } finally {
+        setLoading(false);
+      }
     }
-  };
 
-  const refresh = () => {
-    // Clear cache to force fresh fetch
-    cache = null;
-    fetchLeaderboardStats();
-  };
-
-  useEffect(() => {
-    fetchLeaderboardStats();
+    fetchStats();
   }, []);
 
-  return {
-    data,
-    loading,
-    error,
-    refresh,
-  };
+  return { stats, loading, error };
 }
