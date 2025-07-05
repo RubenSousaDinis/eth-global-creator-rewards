@@ -38,9 +38,7 @@ export default function LeaderboardPage() {
   const { stats, loading: statsLoading } = useLeaderboardStats();
 
   // Countdown state
-  const [countdown, setCountdown] = useState(() =>
-    getCountdownParts(ROUND_ENDS_AT),
-  );
+  const [countdown, setCountdown] = useState(() => getCountdownParts(ROUND_ENDS_AT));
 
   // Hide Farcaster Mini App splash screen when ready
   useEffect(() => {
@@ -56,8 +54,7 @@ export default function LeaderboardPage() {
   }, []);
 
   // Find user entry in leaderboard data (if present)
-  const userLeaderboardEntry =
-    user && entries.find((e) => e.name === (user.displayName || user.username));
+  const userLeaderboardEntry = user && entries.find(e => e.name === (user.displayName || user.username));
 
   // Always show the user pinned at the top
   const pinnedUserEntry = user && {
@@ -66,7 +63,7 @@ export default function LeaderboardPage() {
     pfp: user.pfpUrl || undefined,
     rewards: "-", // To be calculated later
     score: creatorScore ?? 0,
-    id: userLeaderboardEntry ? userLeaderboardEntry.id : "user-pinned",
+    id: userLeaderboardEntry ? userLeaderboardEntry.id : "user-pinned"
   };
 
   // Helper to calculate rewards
@@ -78,26 +75,28 @@ export default function LeaderboardPage() {
   // Handler to navigate to profile for a leaderboard entry
   function handleEntryClick(entry: LeaderboardEntry) {
     const identifier = entry.talent_protocol_id || entry.id;
-    router.push(generateProfileUrl(identifier));
+    const profileUrl = generateProfileUrl({ talentId: identifier });
+    if (profileUrl) {
+      router.push(profileUrl);
+    }
   }
 
   // Handler to navigate to profile for pinned user
   function handlePinnedUserClick() {
     if (!user) return;
-    const entry = entries.find(
-      (e) => e.name === (user.displayName || user.username),
-    );
+    const entry = entries.find(e => e.name === (user.displayName || user.username));
     const identifier = entry?.talent_protocol_id || entry?.id || "user-pinned";
-    router.push(generateProfileUrl(identifier));
+    const profileUrl = generateProfileUrl({ talentId: identifier });
+    if (profileUrl) {
+      router.push(profileUrl);
+    }
   }
 
   return (
-    <div className="max-w-md mx-auto w-full p-4 space-y-6 pb-24">
+    <div className="max-w-md mx-auto w-full px-4 py-8 space-y-6">
       {/* Page Title */}
       <div className="flex items-center px-1 mb-2">
-        <span className="text-xl font-bold leading-tight">
-          Rewards Leaderboard
-        </span>
+        <span className="text-xl font-bold leading-tight">Rewards Leaderboard</span>
       </div>
       {/* Stat Cards */}
       <div className="grid grid-cols-2 gap-4">
@@ -113,9 +112,7 @@ export default function LeaderboardPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-600">
-              Total Rewards
-            </CardTitle>
+            <CardTitle className="text-sm text-gray-600">Total Rewards</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">10 ETH</p>
@@ -124,34 +121,26 @@ export default function LeaderboardPage() {
         {/* Min. Creator Score */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-600">
-              Min. Creator Score
-            </CardTitle>
+            <CardTitle className="text-sm text-gray-600">Min. Creator Score</CardTitle>
           </CardHeader>
           <CardContent>
             {statsLoading ? (
               <Skeleton className="h-8 w-20 rounded" />
             ) : (
-              <p className="text-2xl font-bold">
-                {stats.minScore !== null ? stats.minScore : "-"}
-              </p>
+              <p className="text-2xl font-bold">{stats.minScore !== null ? stats.minScore : "-"}</p>
             )}
           </CardContent>
         </Card>
         {/* Total Creators */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-gray-600">
-              Total Creators
-            </CardTitle>
+            <CardTitle className="text-sm text-gray-600">Total Creators</CardTitle>
           </CardHeader>
           <CardContent>
             {statsLoading ? (
               <Skeleton className="h-8 w-20 rounded" />
             ) : (
-              <p className="text-2xl font-bold">
-                {stats.totalCreators !== null ? stats.totalCreators : "-"}
-              </p>
+              <p className="text-2xl font-bold">{stats.totalCreators !== null ? stats.totalCreators : "-"}</p>
             )}
           </CardContent>
         </Card>
@@ -166,24 +155,14 @@ export default function LeaderboardPage() {
             className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 cursor-pointer hover:bg-purple-100 transition-colors mb-2"
             onClick={handlePinnedUserClick}
           >
-            <span className="text-sm font-medium w-6">
-              #{pinnedUserEntry.rank}
-            </span>
-            <Avatar
-              src={pinnedUserEntry.pfp}
-              fallback={pinnedUserEntry.name[0]}
-              size="md"
-            />
+            <span className="text-sm font-medium w-6">#{pinnedUserEntry.rank}</span>
+            <Avatar src={pinnedUserEntry.pfp} fallback={pinnedUserEntry.name[0]} size="md" />
             <div className="flex-1">
               <p className="font-medium text-sm">{pinnedUserEntry.name}</p>
-              <p className="text-xs text-gray-600">
-                Creator Score: {pinnedUserEntry.score}
-              </p>
+              <p className="text-xs text-gray-600">Creator Score: {pinnedUserEntry.score}</p>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-sm font-medium">
-                {getEthRewards(pinnedUserEntry.score)}
-              </span>
+              <span className="text-sm font-medium">{getEthRewards(pinnedUserEntry.score)}</span>
             </div>
           </div>
         )}
@@ -199,14 +178,10 @@ export default function LeaderboardPage() {
                 <Avatar src={user.pfp} fallback={user.name[0]} size="md" />
                 <div className="flex-1">
                   <p className="font-medium text-sm">{user.name}</p>
-                  <p className="text-xs text-gray-600">
-                    Creator Score: {user.score}
-                  </p>
+                  <p className="text-xs text-gray-600">Creator Score: {user.score}</p>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-sm font-medium">
-                    {getEthRewards(user.score)}
-                  </span>
+                  <span className="text-sm font-medium">{getEthRewards(user.score)}</span>
                 </div>
               </div>
               {index < array.length - 1 && <div className="h-px bg-gray-200" />}
