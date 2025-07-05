@@ -2,7 +2,7 @@ name: Deploy to AWS
 
 on:
   push:
-    branches: [main, fix-missing-domain]
+    branches: [main]
 
 env:
   NODE_VERSION: "20"
@@ -34,7 +34,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: ( github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fix-missing-domain' ) && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: Checkout code
