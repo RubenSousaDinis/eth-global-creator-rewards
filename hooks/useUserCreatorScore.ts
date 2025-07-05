@@ -1,73 +1,88 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import { getUserContext } from "@/lib/user-context";
 import { CreatorScore } from "@/app/services/types";
 
-interface UserCreatorScoreData {
-  score: CreatorScore;
-  rank: number | null;
-  percentile: number | null;
-}
-
 interface UseUserCreatorScoreReturn {
-  data: UserCreatorScoreData | null;
+  data: CreatorScore | null;
   loading: boolean;
   error: string | null;
   refresh: () => void;
 }
 
-export function useUserCreatorScore(
-  userId?: string,
-): UseUserCreatorScoreReturn {
-  const [data, setData] = useState<UserCreatorScoreData | null>(null);
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes (scores are expensive to compute)
+const cache = new Map<string, { data: CreatorScore; timestamp: number }>();
+
+export function useUserCreatorScore(): UseUserCreatorScoreReturn {
+  const [data, setData] = useState<CreatorScore | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { context } = useMiniKit();
+  const user = getUserContext(context);
+  const userFid = user?.fid;
+
   const fetchUserScore = async () => {
+    if (!userFid) {
+      setData(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
-      if (!userId) {
-        setData(null);
+      const cacheKey = `creator-score-${userFid}`;
+
+      // Check cache first
+      const cached = cache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        setData(cached.data);
+        setLoading(false);
         return;
       }
 
-      // TODO: Replace with actual API call to user score service
-      // For now, simulate API call with mock data
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      // Fetch fresh data from API
+      const response = await fetch(
+        `/api/talent-score?fid=${userFid}&scorer=creator_score`,
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to fetch creator score: ${response.status}`);
+      }
 
-      const mockScore: UserCreatorScoreData = {
-        score: {
-          score: 8750,
-          level: 4,
-          levelName: "Advanced Creator",
-          lastCalculatedAt: new Date().toISOString(),
-          walletAddress: "0x123...abc",
-        },
-        rank: 42,
-        percentile: 85.2,
-      };
+      const scoreData = await response.json();
 
-      setData(mockScore);
+      // Cache the result
+      cache.set(cacheKey, {
+        data: scoreData,
+        timestamp: Date.now(),
+      });
+
+      setData(scoreData);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to fetch user creator score",
+        err instanceof Error ? err.message : "Failed to fetch creator score",
       );
+      setData(null);
     } finally {
       setLoading(false);
     }
   };
 
+  const refresh = () => {
+    if (userFid) {
+      // Clear cache for this user to force fresh fetch
+      cache.delete(`creator-score-${userFid}`);
+      fetchUserScore();
+    }
+  };
+
   useEffect(() => {
     fetchUserScore();
-  }, [userId]);
-
-  const refresh = () => {
-    fetchUserScore();
-  };
+  }, [userFid]);
 
   return {
     data,

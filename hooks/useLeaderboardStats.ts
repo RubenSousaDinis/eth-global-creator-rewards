@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getLeaderboardStats } from "@/app/services/leaderboardService";
 
 interface LeaderboardStats {
+  minScore: number | null;
   totalCreators: number;
-  averageScore: number;
-  topScore: number;
-  totalRewards: string;
-  activeCreators: number;
 }
 
 interface UseLeaderboardStatsReturn {
@@ -17,47 +15,57 @@ interface UseLeaderboardStatsReturn {
   refresh: () => void;
 }
 
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+let cache: { data: LeaderboardStats; timestamp: number } | null = null;
+
 export function useLeaderboardStats(): UseLeaderboardStatsReturn {
   const [data, setData] = useState<LeaderboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStats = async () => {
+  const fetchLeaderboardStats = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // TODO: Replace with actual API call to leaderboard service
-      // For now, simulate API call with mock data
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Check cache first
+      if (cache && Date.now() - cache.timestamp < CACHE_TTL) {
+        setData(cache.data);
+        setLoading(false);
+        return;
+      }
 
-      const mockStats: LeaderboardStats = {
-        totalCreators: 1247,
-        averageScore: 5420,
-        topScore: 15670,
-        totalRewards: "2.3M",
-        activeCreators: 892,
+      // Fetch fresh data
+      const statsData = await getLeaderboardStats();
+
+      // Cache the result
+      cache = {
+        data: statsData,
+        timestamp: Date.now(),
       };
 
-      setData(mockStats);
+      setData(statsData);
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : "Failed to fetch leaderboard stats",
       );
+      setData(null);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
   const refresh = () => {
-    fetchStats();
+    // Clear cache to force fresh fetch
+    cache = null;
+    fetchLeaderboardStats();
   };
+
+  useEffect(() => {
+    fetchLeaderboardStats();
+  }, []);
 
   return {
     data,
