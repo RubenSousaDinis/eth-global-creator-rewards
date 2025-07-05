@@ -12,7 +12,6 @@ terraform {
     key    = "terraform.tfstate"
     region = "eu-west-1"
     encrypt = true
-    dynamodb_table = "eth-global-creator-rewards-terraform-locks"
   }
 }
 
@@ -109,6 +108,7 @@ resource "aws_db_instance" "database" {
   maintenance_window     = "sun:04:00-sun:05:00"
 
   skip_final_snapshot = var.environment == "development"
+  final_snapshot_identifier = var.environment == "development" ? null : "${var.app_name}-db-final-snapshot-${formatdate("YYYY-MM-DD-HH-MM", timestamp())}"
   deletion_protection = var.environment == "production"
 
   tags = var.tags
