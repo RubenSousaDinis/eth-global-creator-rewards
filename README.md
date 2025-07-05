@@ -63,6 +63,37 @@ REDIS_TOKEN=
 npm run dev
 ```
 
+## Development Mode
+
+For faster development when working on UI components, you can enable development mode to bypass Dynamic.xyz/Farcaster authentication:
+
+### Quick Setup
+
+1. Create a `.env.local` file in your project root:
+```bash
+# Development mode - when true, uses hardcoded wallet address to skip authentication
+NEXT_PUBLIC_DEV_MODE=true
+```
+
+2. Restart your development server:
+```bash
+npm run dev
+```
+
+### What Development Mode Does
+
+- **Bypasses Authentication**: Skips Dynamic.xyz/Farcaster wallet connection flow
+- **Uses Hardcoded Wallet**: Returns wallet address `0x58A35cF59d5C630c057aF008a78bc67CDc2EC094`
+- **Fetches Real Data**: Still retrieves actual data from Talent API using the hardcoded address
+- **Speeds Up Development**: Eliminates authentication delays for faster UI iteration
+
+### Toggle Between Modes
+
+- **Dev Mode ON**: Set `NEXT_PUBLIC_DEV_MODE=true` in `.env.local`
+- **Production Mode**: Set `NEXT_PUBLIC_DEV_MODE=false` or remove the variable entirely
+
+This feature is perfect for rapid UI development while maintaining realistic data for testing.
+
 ## Template Features
 
 ### Frame Configuration

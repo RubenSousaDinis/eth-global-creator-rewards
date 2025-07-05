@@ -82,6 +82,14 @@ export function getUserContext(
   dynamicPrimaryWallet: unknown,
   isConnected: boolean
 ): UnifiedUserContext | undefined {
+  // Dev mode: Return hardcoded wallet address
+  if (process.env.NEXT_PUBLIC_DEV_MODE === "true") {
+    return {
+      wallet: "0x58A35cF59d5C630c057aF008a78bc67CDc2EC094",
+      source: "dynamic"
+    };
+  }
+
   // Priority 1: Farcaster context (when in Farcaster environment)
   if (farcasterContext?.user && isFarcasterEnvironment()) {
     return {
