@@ -1,42 +1,82 @@
-// Define the type locally since it's not exported from the SDK
-type UserContext = {
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
+
+// Define the type locally since it's not exported from the MiniKit SDK
+type FarcasterUserContext = {
   fid: number;
   username?: string;
   displayName?: string;
   pfpUrl?: string;
 };
 
-/**
- * DEVELOPMENT ONLY: Fallback user for testing outside of Farcaster
- * TODO: REMOVE THIS BEFORE PRODUCTION RELEASE
- * This is temporary code to facilitate development and testing.
- * Must be removed before going to production.
- */
-const DEV_USER: UserContext = {
-  fid: 8446,
-  username: "macedo",
-  displayName: "Filipe Macedo",
-  pfpUrl: "https://i.imgur.com/YgNTMUI.jpg",
+// Unified user context that supports both Farcaster and Dynamic
+export type UnifiedUserContext = {
+  fid?: number;
+  username?: string;
+  displayName?: string;
+  pfpUrl?: string;
+  wallet?: string;
+  source: "farcaster" | "dynamic";
 };
 
 /**
- * Get user context with development fallback
- * In production, this will only return the real Farcaster context
- * In development, it will return a fallback user when outside Farcaster
+ * Detects if the app is running inside a Farcaster MiniApp
+ */
+function isFarcasterEnvironment(): boolean {
+  if (typeof window === "undefined") return false;
+
+  // Check for Farcaster-specific user agent or other indicators
+  const userAgent = window.navigator.userAgent;
+  return userAgent.includes("Farcaster") || userAgent.includes("fc_mobile") || userAgent.includes("warpcast");
+}
+
+/**
+ * Get unified user context from both Farcaster and Dynamic sources
  */
 export function getUserContext(
-  context: { user?: UserContext } | null,
-): UserContext | undefined {
-  // If we're in Farcaster (context exists and has user), use that
-  if (context?.user) {
-    return context.user;
+  farcasterContext: { user?: FarcasterUserContext } | null,
+  dynamicWalletOrUser: any,
+  isDynamicAuthenticated: boolean
+): UnifiedUserContext | undefined {
+  // Priority 1: Farcaster context (when in Farcaster environment)
+  if (farcasterContext?.user && isFarcasterEnvironment()) {
+    return {
+      fid: farcasterContext.user.fid,
+      username: farcasterContext.user.username,
+      displayName: farcasterContext.user.displayName,
+      pfpUrl: farcasterContext.user.pfpUrl,
+      source: "farcaster"
+    };
   }
 
-  // DEVELOPMENT ONLY: Return fallback user when outside Farcaster
-  // TODO: REMOVE THIS BEFORE PRODUCTION RELEASE
-  if (process.env.NODE_ENV === "development") {
-    return DEV_USER;
+  // Priority 2: Dynamic context (when authenticated)
+  if (isDynamicAuthenticated && dynamicWalletOrUser) {
+    let walletAddress: string | undefined;
+
+    // Handle different Dynamic object structures
+    if (dynamicWalletOrUser.address) {
+      walletAddress = dynamicWalletOrUser.address;
+    } else if (dynamicWalletOrUser.publicKey) {
+      walletAddress = dynamicWalletOrUser.publicKey;
+    } else if (typeof dynamicWalletOrUser === "string") {
+      walletAddress = dynamicWalletOrUser;
+    }
+
+    if (walletAddress) {
+      return {
+        wallet: walletAddress,
+        source: "dynamic"
+      };
+    }
   }
 
   return undefined;
+}
+
+/**
+ * React hook to get unified user context
+ */
+export function useUnifiedUserContext(): UnifiedUserContext | undefined {
+  const { user: dynamicUser } = useDynamicContext();
+
+  return getUserContext(null, dynamicUser, !!dynamicUser);
 }

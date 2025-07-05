@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { getUserContext } from "@/lib/user-context";
 import type { LeaderboardEntry } from "@/app/services/types";
 import { generateProfileUrl } from "@/lib/utils";
@@ -29,7 +30,8 @@ function getCountdownParts(target: Date) {
 
 export default function LeaderboardPage() {
   const { context } = useMiniKit();
-  const user = getUserContext(context);
+  const { user: dynamicUser, primaryWallet } = useDynamicContext();
+  const user = getUserContext(context, primaryWallet || dynamicUser, !!primaryWallet);
   const router = useRouter();
 
   // Use new hooks for data fetching

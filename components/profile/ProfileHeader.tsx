@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/drawer";
 import { Copy, WalletMinimal } from "lucide-react";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { getUserContext } from "@/lib/user-context";
 import { useProfileWalletAddresses } from "@/hooks/useProfileWalletAddresses";
 import { truncateAddress } from "@/lib/utils";
@@ -26,7 +27,8 @@ export function ProfileHeader({
   profileImage?: string;
 }) {
   const { context } = useMiniKit();
-  const user = getUserContext(context);
+  const { user: dynamicUser, primaryWallet } = useDynamicContext();
+  const user = getUserContext(context, primaryWallet || dynamicUser, !!primaryWallet);
   const name = displayName || user?.displayName || user?.username || "Unknown user";
   const image = profileImage || user?.pfpUrl || "https://api.dicebear.com/7.x/identicon/svg?seed=profile";
   const fid = user?.fid; // Only use real fid, no fallback
