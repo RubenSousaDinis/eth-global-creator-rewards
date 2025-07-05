@@ -1,5 +1,5 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import { getParagraphPostUrl } from "@/lib/contract-utils";
+import { getPostUrl } from "@/lib/contract-utils";
 
 interface OriginUrlResponse {
   contractAddress: string;
@@ -8,13 +8,14 @@ interface OriginUrlResponse {
 
 export function useOriginUrl(
   contractAddress: string,
+  postType: "paragraph" | "mirror" = "paragraph",
   enabled: boolean = false,
   options?: UseQueryOptions<OriginUrlResponse>
 ) {
   return useQuery({
-    queryKey: ["originUrl", contractAddress],
+    queryKey: ["originUrl", contractAddress, postType],
     queryFn: async () => {
-      const originUrl = await getParagraphPostUrl(contractAddress);
+      const originUrl = await getPostUrl(contractAddress, postType);
       return {
         contractAddress,
         originUrl
@@ -28,8 +29,12 @@ export function useOriginUrl(
 }
 
 // Hook to get just the origin URL string
-export function useOriginUrlData(contractAddress: string, enabled: boolean = false) {
-  const { data, ...rest } = useOriginUrl(contractAddress, enabled);
+export function useOriginUrlData(
+  contractAddress: string,
+  postType: "paragraph" | "mirror" = "paragraph",
+  enabled: boolean = false
+) {
+  const { data, ...rest } = useOriginUrl(contractAddress, postType, enabled);
 
   return {
     originUrl: data?.originUrl || null,
