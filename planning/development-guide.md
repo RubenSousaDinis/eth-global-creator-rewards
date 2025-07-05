@@ -209,23 +209,30 @@ External APIs → Services → Hooks → Pure UI Components
 **Commit**: `fix: resolve API parameter mismatches for leaderboard endpoints`
 **Commit**: `feat: complete API refactoring migration with shared utilities`
 
-## Phase 4: Profile System
+## Phase 4: Profile System ✅ COMPLETED
 
-### 4.1 Profile UI Components
+### 4.1 Profile UI Components ✅
 **Goal**: Create all profile UI components
 
 **Components**:
-- `components/profile/ProfileHeader.tsx` - Header with avatar/stats
-- `components/profile/StatCard.tsx` - Individual stat display
+- `components/profile/ProfileHeader.tsx` - Header with avatar/stats and wallet drawer
+- `components/ui/StatCard.tsx` - Individual stat display (moved to ui/)
 - `components/profile/AccountCard.tsx` - Social account card
 - `components/profile/AccountGrid.tsx` - Grid of accounts
 - `components/profile/ProfileTabs.tsx` - Tabs with score breakdown
+- `components/profile/ScoreProgressAccordion.tsx` - Creator score display with progress
+- `components/profile/ScoreDataPoints.tsx` - Credential breakdown and sorting
+- `components/profile/CredentialIdeasCallout.tsx` - Feedback callout component
 
-**All components**: Pure UI, receive data via props
+**Architecture Notes**:
+- All components are pure UI, receive data via props
+- ProfileTabs refactored from 388 → 85 lines (78% reduction)
+- Components follow single-responsibility principle
+- Uses theme-aware design system
 
-**Commit**: `feat: add profile UI components`
+**Commits**: `feat: import and integrate profile UI components`
 
-### 4.2 Profile Data Hooks
+### 4.2 Profile Data Hooks ✅
 **Goal**: Create specialized profile data hooks
 
 **Hooks**:
@@ -233,64 +240,87 @@ External APIs → Services → Hooks → Pure UI Components
 - `hooks/useProfileCreatorScore.ts` - Creator score and breakdown
 - `hooks/useProfileSocialAccounts.ts` - Social platform connections
 - `hooks/useProfileTotalEarnings.ts` - ETH earnings calculation
+- `hooks/useProfileWalletAddresses.ts` - Wallet addresses for user
+- `hooks/useProfileCredentials.ts` - User credentials data
 
-**Commit**: `feat: add profile data hooks`
+**Supporting Services**:
+- `app/services/credentialsService.ts` - Credential fetching and grouping
+- `lib/credentialUtils.ts` - Credential processing utilities
 
-### 4.3 Profile Page
-**Goal**: Create profile page using hooks
+**Pattern**: All hooks return `{data, loading, error}` interface
 
-**Page**: `app/[identifier]/page.tsx`
-- Uses profile hooks for data
-- Renders profile components
-- Handles loading and error states
+**Commits**: `feat: import profile data hooks and services`
 
-**Commit**: `feat: add profile page with hook integration`
+### 4.3 Profile Screen ✅
+**Goal**: Create profile screen using hooks
 
-### 4.4 Profile Modal
-**Goal**: Create profile modal for leaderboard
+**Component**: `components/profile/ProfileScreen.tsx`
+- Uses all profile hooks for data fetching
+- Renders ProfileHeader, StatCards, and ProfileTabs
+- Handles loading states with skeletons
+- Error handling with theme-aware Callout component
+- Follows established pure UI patterns
 
-**Component**: `components/leaderboard/MinimalProfileDrawer.tsx`
-- Uses profile hooks
-- Drawer component for mobile
-- Modal for desktop
+**Integration**: Profile screen ready for dynamic route usage
 
-**Commit**: `feat: add profile modal drawer`
+**Commits**: `feat: complete profile screen with hook integration`
+
+### ~~4.4 Profile Modal~~ ❌ REMOVED
+**Architectural Decision**: Removed MinimalProfileDrawer complexity in favor of direct navigation
+
+**Reasoning**:
+- Better UX: Single-click navigation instead of preview → navigate flow
+- Simpler architecture: Eliminated complex drawer state management
+- Bundle optimization: 23% smaller leaderboard bundle (4.1kB → 3.17kB)
+- MiniApp alignment: Direct navigation follows Farcaster MiniApp best practices
+
+**Implementation**: Uses `generateProfileUrl` utility for consistent profile routing
+
+**Commits**: `refactor: remove MinimalProfileDrawer complexity and implement direct navigation`
 
 ## Phase 5: Integration & Polish
 
-### 5.1 Error Handling
+### 5.1 Error Handling ✅
 **Goal**: Implement consistent error handling
 
-**Components**: Add error states using `Callout` component
-**Hooks**: Ensure all hooks handle errors gracefully
+**Components**: Theme-aware `Callout` component with variants (default, destructive, warning)
+**Hooks**: All hooks handle errors gracefully with consistent error interface
+**Implementation**: Replaced hardcoded colors with semantic theming
 
-**Commit**: `feat: add comprehensive error handling`
+**Commits**: `feat: add theme-aware error handling with Callout component`
 
-### 5.2 Loading States
+### 5.2 Loading States ✅
 **Goal**: Add skeleton loading components
 
-**Components**: Create skeleton versions of main components
-**Integration**: Use in all pages and components
+**Components**: Skeleton components integrated throughout profile system
+**Integration**: ProfileScreen, ProfileHeader, and all major components have loading states
+**Implementation**: Uses shadcn/ui Skeleton component with proper responsive design
 
-**Commit**: `feat: add skeleton loading states`
+**Commits**: `feat: integrate skeleton loading states in profile system`
 
-### 5.3 Caching Strategy
+### 5.3 Caching Strategy ✅
 **Goal**: Implement proper caching in hooks
 
 **Caching TTLs**:
-- Profile data: 5 minutes
-- Score data: 30 minutes
-- Leaderboard: 5 minutes
+- Profile data: 5 minutes (`CACHE_DURATIONS.PROFILE_DATA`)
+- Score data: 30 minutes (`CACHE_DURATIONS.SCORE_BREAKDOWN`)
+- ETH price: 24 hours (`CACHE_DURATIONS.ETH_PRICE`)
 
-**Commit**: `feat: implement caching strategy in hooks`
+**Implementation**: Generic caching utilities in `lib/utils.ts` with localStorage
+**Usage**: All profile hooks use consistent caching patterns
 
-### 5.4 Final Integration
-**Goal**: Connect all remaining pieces
+**Commits**: `feat: implement comprehensive caching strategy`
 
-**Tasks**:
-- Ensure all components use hooks
-- Remove any remaining API calls from components
-- Test all screens and interactions
+### 5.4 Final Integration ⏳
+**Goal**: Connect profile system to dynamic routes
+
+**Remaining Tasks**:
+- Create/update `app/[identifier]/page.tsx` to use ProfileScreen
+- Test profile pages with real data
+- Verify all profile functionality end-to-end
+- Performance testing and optimization
+
+**Next Steps**: Ready for dynamic profile page implementation
 
 **Commit**: `feat: complete modular architecture integration`
 
@@ -367,8 +397,22 @@ export async function fetchUserProfile(uuid: string): Promise<User> {
 - ✅ API refactoring migration completed
 - ✅ Console errors resolved
 - ✅ Creator scores working end-to-end
-- ⏳ Profile system (next phase)
-- ⏳ Integration & polish (final phase)
+- ✅ **Profile system completed**
+- ✅ **Theme-aware design system**
+- ✅ **Modular architecture achieved**
+- ⏳ Dynamic profile pages (final integration)
+- ⏳ Production deployment
+
+## Current Status: Phase 4 Complete ✅
+
+**Major Achievements**:
+- **Profile System**: Complete with 6 hooks and 8 UI components
+- **Build Health**: All TypeScript compilation errors resolved
+- **Architecture**: Pure UI components + centralized data fetching established
+- **Performance**: 78% code reduction in ProfileTabs through proper extraction
+- **UX**: Direct navigation replaces complex drawer patterns
+- **Theming**: Theme-aware components replace hardcoded colors
+- **Caching**: Comprehensive caching strategy implemented
 
 ## Final Notes
 
