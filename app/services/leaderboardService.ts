@@ -5,9 +5,11 @@ import { LeaderboardEntry } from "./types";
  */
 export async function getLeaderboardCreators({
   page = 1,
-  perPage = 10,
+  perPage = 10
 }: { page?: number; perPage?: number } = {}): Promise<LeaderboardEntry[]> {
-  const res = await fetch(`/api/leaderboard?page=${page}&per_page=${perPage}`);
+  const url = `/api/leaderboard?page=${page}&per_page=${perPage}`;
+  console.debug("url", url);
+  const res = await fetch(url);
   if (!res.ok) {
     const errorText = await res.text();
     throw new Error(errorText || "Failed to fetch leaderboard data");
@@ -30,6 +32,6 @@ export async function getLeaderboardStats(): Promise<{
   const json = await res.json();
   return {
     minScore: json.minScore ?? null,
-    totalCreators: json.totalCreators ?? 0,
+    totalCreators: json.totalCreators ?? 0
   };
 }
