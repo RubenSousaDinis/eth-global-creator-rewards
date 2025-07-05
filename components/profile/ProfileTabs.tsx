@@ -8,6 +8,7 @@ import { useProfileCredentials } from "@/hooks/useProfileCredentials";
 import { ScoreProgressAccordion } from "./ScoreProgressAccordion";
 import { ScoreDataPoints } from "./ScoreDataPoints";
 import { CredentialIdeasCallout } from "./CredentialIdeasCallout";
+import { DeployedPosts } from "../DeployedPosts";
 
 interface ProfileTabsProps {
   accountsCount: number;
@@ -74,7 +75,7 @@ export function ProfileTabs({ accountsCount, socialAccounts, talentUUID }: Profi
         </TabsTrigger>
       </TabsList>
       <TabsContent value="content" className="mt-6 p-2">
-        {/* Empty content for now */}
+        <DeployedPosts walletAddress={talentUUID} />
       </TabsContent>
       <TabsContent value="accounts" className="mt-6 p-2">
         <AccountGrid socialAccounts={socialAccounts} />

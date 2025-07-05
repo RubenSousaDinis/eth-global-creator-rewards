@@ -4,17 +4,13 @@ import * as React from "react";
 import { ProfileHeader } from "./ProfileHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { ProfileTabs } from "./ProfileTabs";
-import {
-  formatNumberWithSuffix,
-  formatK,
-  calculateTotalFollowers,
-} from "@/lib/utils";
+import { formatNumberWithSuffix, formatK, calculateTotalFollowers } from "@/lib/utils";
 import { useProfileHeaderData } from "@/hooks/useProfileHeaderData";
 import { useProfileCreatorScore } from "@/hooks/useProfileCreatorScore";
 import { useProfileSocialAccounts } from "@/hooks/useProfileSocialAccounts";
 import { useProfileTotalEarnings } from "@/hooks/useProfileTotalEarnings";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Callout } from "@/components/ui/Callout";
+import { Callout } from "@/components/ui/callout";
 
 interface ProfileScreenProps {
   talentUUID: string;
@@ -23,16 +19,10 @@ interface ProfileScreenProps {
 
 export function ProfileScreen({ talentUUID, children }: ProfileScreenProps) {
   // Use hooks to fetch all data
-  const {
-    profile,
-    loading: profileLoading,
-    error: profileError,
-  } = useProfileHeaderData(talentUUID);
-  const { creatorScore, loading: scoreLoading } =
-    useProfileCreatorScore(talentUUID);
+  const { profile, loading: profileLoading, error: profileError } = useProfileHeaderData(talentUUID);
+  const { creatorScore, loading: scoreLoading } = useProfileCreatorScore(talentUUID);
   const { socialAccounts } = useProfileSocialAccounts(talentUUID);
-  const { totalEarnings, loading: earningsLoading } =
-    useProfileTotalEarnings(talentUUID);
+  const { totalEarnings, loading: earningsLoading } = useProfileTotalEarnings(talentUUID);
 
   // Calculate total followers
   const totalFollowers = calculateTotalFollowers(socialAccounts);
@@ -62,7 +52,7 @@ export function ProfileScreen({ talentUUID, children }: ProfileScreenProps) {
     return (
       <main className="flex-1 overflow-y-auto relative">
         <div className="container max-w-md mx-auto px-4 py-6">
-          <Callout>
+          <Callout variant="destructive">
             <strong>Error loading profile:</strong> {profileError}
           </Callout>
         </div>
@@ -79,26 +69,13 @@ export function ProfileScreen({ talentUUID, children }: ProfileScreenProps) {
           profileImage={profile?.image_url}
         />
         <div className="flex flex-row gap-4 w-full">
-          <StatCard
-            title="Creator Score"
-            value={scoreLoading ? "—" : (creatorScore?.toLocaleString() ?? "—")}
-          />
+          <StatCard title="Creator Score" value={scoreLoading ? "—" : (creatorScore?.toLocaleString() ?? "—")} />
           <StatCard
             title="Total Earnings"
-            value={
-              earningsLoading
-                ? "—"
-                : totalEarnings === null
-                  ? "—"
-                  : formatNumberWithSuffix(totalEarnings)
-            }
+            value={earningsLoading ? "—" : totalEarnings === null ? "—" : formatNumberWithSuffix(totalEarnings)}
           />
         </div>
-        <ProfileTabs
-          accountsCount={socialAccounts.length}
-          socialAccounts={socialAccounts}
-          talentUUID={talentUUID}
-        />
+        <ProfileTabs accountsCount={socialAccounts.length} socialAccounts={socialAccounts} talentUUID={talentUUID} />
         {children}
       </div>
     </main>

@@ -224,11 +224,7 @@ External APIs → Services → Hooks → Pure UI Components
 - `components/profile/ScoreDataPoints.tsx` - Credential breakdown and sorting
 - `components/profile/CredentialIdeasCallout.tsx` - Feedback callout component
 
-**Architecture Notes**:
-- All components are pure UI, receive data via props
-- ProfileTabs refactored from 388 → 85 lines (78% reduction)
-- Components follow single-responsibility principle
-- Uses theme-aware design system
+**All components**: Pure UI, receive data via props
 
 **Commits**: `feat: import and integrate profile UI components`
 
@@ -263,20 +259,7 @@ External APIs → Services → Hooks → Pure UI Components
 
 **Integration**: Profile screen ready for dynamic route usage
 
-**Commits**: `feat: complete profile screen with hook integration`
-
-### ~~4.4 Profile Modal~~ ❌ REMOVED
-**Architectural Decision**: Removed MinimalProfileDrawer complexity in favor of direct navigation
-
-**Reasoning**:
-- Better UX: Single-click navigation instead of preview → navigate flow
-- Simpler architecture: Eliminated complex drawer state management
-- Bundle optimization: 23% smaller leaderboard bundle (4.1kB → 3.17kB)
-- MiniApp alignment: Direct navigation follows Farcaster MiniApp best practices
-
-**Implementation**: Uses `generateProfileUrl` utility for consistent profile routing
-
-**Commits**: `refactor: remove MinimalProfileDrawer complexity and implement direct navigation`
+**Commit**: `feat: add profile modal drawer`
 
 ## Phase 5: Integration & Polish
 

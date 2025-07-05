@@ -5,7 +5,8 @@
   "scripts": {
     "build": "next build",
     "build:open-next": "open-next build",
-    "dev": "next dev --port 3002",
+    "dev": "next dev --port 3000",
+    "_dev-port-note": "Port 3000 matches DEV_PORT in lib/constants.ts - keep in sync",
     "lint": "next lint",
     "start": "next start",
     "format": "prettier --write .",
@@ -15,6 +16,7 @@
     "@coinbase/onchainkit": "latest",
     "@farcaster/frame-sdk": "^0.0.60",
     "@neynar/nodejs-sdk": "^3.21.0",
+    "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-progress": "^1.1.7",

@@ -8,7 +8,7 @@ import {
   logApiError,
   createServerErrorResponse,
   createBadRequestResponse,
-  createNotFoundResponse,
+  createNotFoundResponse
 } from "./api-utils";
 import { NextResponse } from "next/server";
 
@@ -64,7 +64,7 @@ export class TalentApiClient {
 
   private async makeRequest(
     endpoint: string,
-    params: URLSearchParams,
+    params: URLSearchParams
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
     const url = buildApiUrl(`${TALENT_API_BASE}${endpoint}`, params);
@@ -79,9 +79,7 @@ export class TalentApiClient {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(
-        data.error || `HTTP ${response.status}: ${response.statusText}`,
-      );
+      throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
     }
 
     return data;
@@ -107,20 +105,15 @@ export class TalentApiClient {
         return NextResponse.json({
           score: {
             points: data.scores[0].points,
-            last_calculated_at: data.scores[0].last_calculated_at,
-          },
+            last_calculated_at: data.scores[0].last_calculated_at
+          }
         });
       }
 
       return NextResponse.json(data);
     } catch (error) {
-      const identifier =
-        params.account_source === "wallet" ? params.address : params.fid;
-      logApiError(
-        "getScore",
-        identifier || "unknown",
-        error instanceof Error ? error.message : String(error),
-      );
+      const identifier = params.account_source === "wallet" ? params.address : params.fid;
+      logApiError("getScore", identifier || "unknown", error instanceof Error ? error.message : String(error));
       return createServerErrorResponse("Failed to fetch talent score");
     }
   }
@@ -141,13 +134,8 @@ export class TalentApiClient {
       const data = await this.makeRequest("/credentials", urlParams);
       return NextResponse.json(data);
     } catch (error) {
-      const identifier =
-        params.account_source === "wallet" ? params.address : params.fid;
-      logApiError(
-        "getCredentials",
-        identifier || "unknown",
-        error instanceof Error ? error.message : String(error),
-      );
+      const identifier = params.account_source === "wallet" ? params.address : params.fid;
+      logApiError("getCredentials", identifier || "unknown", error instanceof Error ? error.message : String(error));
       return createServerErrorResponse("Failed to fetch credentials");
     }
   }
@@ -182,17 +170,10 @@ export class TalentApiClient {
       const identifier = params.talent_protocol_id || params.id;
 
       if (error instanceof Error && error.message.includes("404")) {
-        return NextResponse.json(
-          { error: "Talent API returned 404", data: {} },
-          { status: 502 },
-        );
+        return NextResponse.json({ error: "Talent API returned 404", data: {} }, { status: 502 });
       }
 
-      logApiError(
-        "getSocials",
-        identifier || "unknown",
-        error instanceof Error ? error.message : String(error),
-      );
+      logApiError("getSocials", identifier || "unknown", error instanceof Error ? error.message : String(error));
       return createServerErrorResponse("Failed to fetch social accounts");
     }
   }
@@ -208,9 +189,11 @@ export class TalentApiClient {
     }
 
     try {
+      // Use the official /profile endpoint as per API documentation
       const urlParams = new URLSearchParams();
       urlParams.append("id", params.id);
 
+      // Add account_source if provided to help with lookup
       if (params.account_source) {
         urlParams.append("account_source", params.account_source);
       }
@@ -226,24 +209,18 @@ export class TalentApiClient {
       const accounts = Array.isArray(profile.accounts) ? profile.accounts : [];
 
       const farcasterAccount = accounts.find(
-        (acc: { source: string; username?: string }) =>
-          acc.source === "farcaster" && acc.username,
+        (acc: { source: string; username?: string }) => acc.source === "farcaster" && acc.username
       );
       const fid = farcasterAccount ? Number(farcasterAccount.identifier) : null;
 
       const walletAccount = accounts.find(
         (acc: { identifier: string; source: string }) =>
-          acc.source === "wallet" &&
-          acc.identifier &&
-          acc.identifier.startsWith("0x"),
+          acc.source === "wallet" && acc.identifier && acc.identifier.startsWith("0x")
       );
-      const wallet = walletAccount
-        ? walletAccount.identifier
-        : profile.user?.main_wallet || null;
+      const wallet = walletAccount ? walletAccount.identifier : profile.user?.main_wallet || null;
 
       const githubAccount = accounts.find(
-        (acc: { username?: string; source: string }) =>
-          acc.source === "github" && acc.username,
+        (acc: { username?: string; source: string }) => acc.source === "github" && acc.username
       );
 
       const fname = farcasterAccount?.username || null;
@@ -258,14 +235,10 @@ export class TalentApiClient {
         fname,
         display_name: profile.display_name || profile.name || null,
         image_url: profile.image_url || null,
-        ...profile,
+        ...profile
       });
     } catch (error) {
-      logApiError(
-        "getProfile",
-        params.id || "unknown",
-        error instanceof Error ? error.message : String(error),
-      );
+      logApiError("getProfile", params.id || "unknown", error instanceof Error ? error.message : String(error));
       return createServerErrorResponse("Failed to fetch user data");
     }
   }
