@@ -1,5 +1,4 @@
 import { Header } from "@/components/navigation/Header";
-import { BottomNav } from "@/components/navigation/BottomNav";
 import { DeployedPosts } from "@/components/DeployedPosts";
 
 interface ProfilePageProps {
@@ -30,8 +29,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           </div>
         </div>
       </main>
-
-      <BottomNav />
     </div>
   );
 }

@@ -92,7 +92,7 @@ export default function LeaderboardPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto w-full p-4 space-y-6 pb-24">
+    <div className="max-w-md mx-auto w-full px-4 py-8 space-y-6">
       {/* Page Title */}
       <div className="flex items-center px-1 mb-2">
         <span className="text-xl font-bold leading-tight">
