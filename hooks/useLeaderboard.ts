@@ -1,84 +1,108 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getLeaderboardCreators } from "@/app/services/leaderboardService";
-import { LeaderboardEntry } from "@/app/services/types";
+import type { LeaderboardEntry } from "@/app/services/types";
+import { getCachedData, setCachedData, CACHE_DURATIONS } from "@/lib/utils";
 
-interface UseLeaderboardParams {
-  page?: number;
-  perPage?: number;
-}
-
-interface UseLeaderboardReturn {
-  data: LeaderboardEntry[] | null;
-  loading: boolean;
-  error: string | null;
-  refresh: () => void;
-}
-
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-const cache = new Map<
-  string,
-  { data: LeaderboardEntry[]; timestamp: number }
->();
-
-export function useLeaderboard({
-  page = 1,
-  perPage = 10,
-}: UseLeaderboardParams = {}): UseLeaderboardReturn {
-  const [data, setData] = useState<LeaderboardEntry[] | null>(null);
-  const [loading, setLoading] = useState(true);
+export function useLeaderboard(perPage: number = 10) {
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
 
-  const cacheKey = `leaderboard-${page}-${perPage}`;
+  const loadInitialData = useCallback(async () => {
+    const cacheKey = `leaderboard_page_1_${perPage}`;
 
-  const fetchLeaderboardData = async () => {
+    // Check cache first
+    const cachedData = getCachedData<LeaderboardEntry[]>(
+      cacheKey,
+      CACHE_DURATIONS.PROFILE_DATA, // 5 minute cache for leaderboard
+    );
+
+    if (cachedData && cachedData.length > 0) {
+      setEntries(cachedData);
+      setPage(1);
+      setHasMore(cachedData.length >= perPage);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
+      const data = await getLeaderboardCreators({ page: 1, perPage });
+      setEntries(data);
+      setPage(1);
+      setHasMore(data.length >= perPage);
 
-      // Check cache first
-      const cached = cache.get(cacheKey);
-      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-        setData(cached.data);
-        setLoading(false);
-        return;
-      }
-
-      // Fetch fresh data
-      const leaderboardData = await getLeaderboardCreators({ page, perPage });
-
-      // Cache the result
-      cache.set(cacheKey, {
-        data: leaderboardData,
-        timestamp: Date.now(),
-      });
-
-      setData(leaderboardData);
+      // Cache the initial data
+      setCachedData(cacheKey, data);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to fetch leaderboard data",
+        err instanceof Error ? err.message : "Failed to load leaderboard",
       );
-      setData(null);
+      setEntries([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [perPage]);
 
-  const refresh = () => {
-    // Clear cache for this key to force fresh fetch
-    cache.delete(cacheKey);
-    fetchLeaderboardData();
-  };
+  const loadMore = useCallback(async () => {
+    if (loading || !hasMore) return;
 
+    setLoading(true);
+    setError(null);
+
+    try {
+      const nextPage = page + 1;
+      const data = await getLeaderboardCreators({ page: nextPage, perPage });
+
+      if (data.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      // Combine previous and new entries
+      const combined = [...entries, ...data];
+      // Recalculate rank for all entries to handle ties properly
+      const reRanked = combined.map((entry, idx) => ({
+        ...entry,
+        rank: idx + 1,
+      }));
+
+      setEntries(reRanked);
+      setPage(nextPage);
+      setHasMore(data.length >= perPage);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load more entries",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [entries, page, perPage, loading, hasMore]);
+
+  // Load initial data on mount
   useEffect(() => {
-    fetchLeaderboardData();
-  }, [page, perPage]);
+    loadInitialData();
+  }, [loadInitialData]);
+
+  const refresh = useCallback(() => {
+    setEntries([]);
+    setPage(1);
+    setHasMore(true);
+    loadInitialData();
+  }, [loadInitialData]);
 
   return {
-    data,
+    entries,
     loading,
     error,
+    hasMore,
+    loadMore,
     refresh,
   };
 }

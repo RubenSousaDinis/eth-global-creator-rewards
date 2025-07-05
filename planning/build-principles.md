@@ -28,13 +28,14 @@
 **CRITICAL**: This app follows a **strict modular architecture** where:
 
 ```
-External APIs → Services → Hooks → Pure UI Components
+External APIs → API Clients → Services → Hooks → Pure UI Components
 ```
 
 #### Layer Responsibilities:
-1. **Services Layer**: External API integration only
-2. **Hooks Layer**: All data fetching, caching, and business logic  
-3. **Components Layer**: Pure UI components that receive data via props only
+1. **API Clients Layer** (lib/): Abstracted external API interactions with shared utilities
+2. **Services Layer**: Domain-specific business logic and data transformations
+3. **Hooks Layer**: All data fetching, caching, and state management  
+4. **Components Layer**: Pure UI components that receive data via props only
 
 ### Data Fetching Principles
 
@@ -75,6 +76,7 @@ External APIs → Services → Hooks → Pure UI Components
 - **Score**: The sum of all Credentials, representing a user's overall builder status.
 - **Data Point**: Any individual metric or value used to calculate Credentials and Score.
 - **Session**: The current authenticated context for a user, including authentication method and active accounts.
+- **API Client**: An abstracted class that provides a unified interface to external APIs with built-in error handling, validation, and retry logic.
 - **Hook**: A custom React hook that encapsulates data fetching, caching, and business logic.
-- **Service**: A module that abstracts external API interactions and data transformations.
+- **Service**: A module that handles domain-specific business logic and data transformations.
 - **Component**: A pure UI component that receives data via props and handles only presentation logic. 

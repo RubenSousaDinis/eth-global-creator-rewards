@@ -1,26 +1,26 @@
 # Creator Score Miniapp - Modular File Structure
 
-This file structure reflects the **planned modular architecture** where UI components are pure (props-only) and all data fetching is handled by specialized hooks and services.
+This file structure reflects the **completed modular architecture** where UI components are pure (props-only) and all data fetching is handled by specialized hooks and services.
 
 ## Core Architecture Principles
 
 - **Pure UI Components**: All components in `components/` receive data via props only
 - **Centralized Data Fetching**: Custom hooks in `hooks/` handle all API calls and business logic
 - **Modular Service Layer**: External API interactions split into focused, single-responsibility services
+- **MiniApp Authentication**: User context provided automatically via MiniKit (no separate auth needed)
 - **Shared Utilities**: Common functions and constants in `lib/`
 
 ```plaintext
 creator-score-miniapp/
   app/                           # Next.js app directory
-    api/                         # API route handlers (proxy to external APIs)
-      farcaster-wallets/         # Farcaster wallet resolution
+    api/                         # API route handlers (REFACTORED: ~80% code reduction)
+      farcaster-wallets/         # Unified wallet resolution (consolidated from 2 routes)
       leaderboard/               # Leaderboard data aggregation
       notify/                    # Notification handling
-      talent-credentials/        # Talent Protocol credentials
-      talent-score/              # Talent Protocol scores
-      talent-socials/            # Social account data
-      talent-user/               # User profile data
-      wallet-addresses/          # Wallet address resolution
+      talent-credentials/        # Talent Protocol credentials (simplified with client)
+      talent-score/              # Talent Protocol scores (simplified with client)
+      talent-socials/            # Social account data (simplified with client)
+      talent-user/               # User profile data (simplified with client)
       webhook/                   # Webhook handlers
     [identifier]/                # Dynamic profile routes (Farcaster/GitHub/UUID)
       page.tsx                   # Profile page - uses useProfile* hooks
@@ -28,7 +28,7 @@ creator-score-miniapp/
       page.tsx                   # Leaderboard - uses useLeaderboard* hooks
     settings/                    # Settings page
       page.tsx                   # Settings page (minimal)
-    services/                    # Modular service layer
+    services/                    # Modular service layer (refactored from single file)
       types.ts                   # Shared interfaces and types
       scoresService.ts           # Score-related functions (Builder/Creator scores)
       credentialsService.ts      # Credential fetching and grouping
@@ -48,14 +48,15 @@ creator-score-miniapp/
       BottomNav.tsx              # Mobile bottom navigation
       Header.tsx                 # Top header with user info
       InfoModal.tsx              # About/info modal
-      RequireFarcasterUser.tsx   # Auth gate component
-    profile/                     # Profile UI components
+    profile/                     # Profile UI components (REFACTORED: ProfileTabs modularized)
       AccountCard.tsx            # Social account display card
       AccountGrid.tsx            # Grid of social accounts
       ProfileHeader.tsx          # Profile header with avatar/stats
       ProfileScreen.tsx          # Main profile layout
-      ProfileTabs.tsx            # Profile tabs with score breakdown
-      StatCard.tsx               # Individual stat display
+      ProfileTabs.tsx            # Profile tabs layout (REFACTORED: 388→85 lines)
+      ScoreProgressAccordion.tsx # Creator Score progress display (EXTRACTED from ProfileTabs)
+      ScoreDataPoints.tsx        # Credential breakdown display (EXTRACTED from ProfileTabs)
+      CredentialIdeasCallout.tsx # Feedback callout component (EXTRACTED from ProfileTabs)
       comingSoonCredentials.ts   # Placeholder credentials config
     settings/                    # Settings UI components (empty)
     ui/                          # shadcn/ui primitives
@@ -69,8 +70,8 @@ creator-score-miniapp/
       drawer.tsx                 # Bottom sheet/drawer
       progress.tsx               # Progress bars
       skeleton.tsx               # Loading skeletons
+      StatCard.tsx               # Individual stat display (MOVED from profile/)
       tabs.tsx                   # Tab navigation
-    FarcasterGate.tsx            # Farcaster authentication gate
 
   hooks/                         # Custom React hooks (all data fetching)
     useLeaderboard.ts            # Paginated leaderboard data
@@ -86,7 +87,11 @@ creator-score-miniapp/
     neynarService.ts             # Neynar/Farcaster API client
 
   lib/                           # Shared utilities and configuration
+    api-utils.ts                 # NEW: Shared API utilities (validation, error handling, retry)
+    talent-api-client.ts         # NEW: Abstracted Talent Protocol API client
+    neynar-client.ts             # NEW: Abstracted Neynar API client
     constants.ts                 # App-wide constants (cache durations, etc.)
+    credentialUtils.ts           # NEW: Credential processing utilities (EXTRACTED from ProfileTabs)
     notification-client.ts       # Notification system client
     notification.ts              # Notification helpers
     redis.ts                     # Redis caching utilities
@@ -106,7 +111,7 @@ creator-score-miniapp/
 
   planning/                      # Documentation and planning
     architecture.md              # Core principles and patterns
-    development-guide.md         # Development guide and phases
+    migration-plan.md            # Completed migration documentation
     file-structure.md            # This file
     tasks.md                     # Development tasks
 
@@ -127,11 +132,11 @@ creator-score-miniapp/
 
 ### Data Flow Pattern
 ```
-External APIs → Modular Services → Hooks → Components
+MiniKit Context (User Auth) → External APIs → API Clients (lib/) → Modular Services → Hooks → Components
 ```
 
-### Service Layer Architecture
-The service layer is designed as focused modules:
+### Service Layer Architecture (NEW)
+The service layer has been refactored from a single 926-line file into focused modules:
 
 - **types.ts**: All shared interfaces and constants
 - **scoresService.ts**: Builder/Creator score calculations and API calls
@@ -159,19 +164,30 @@ The service layer is designed as focused modules:
 All hooks return: `{ data, loading, error }` consistently
 Components display errors using `Callout` component with graceful fallbacks
 
-## Service Layer Benefits
+## Service Layer Refactoring Details
 
-The modular service architecture provides:
+### Before: Single Monolithic File
+- `app/services/talentService.ts` - 926 lines, 11 functions, mixed responsibilities
+
+### After: Modular Architecture
+- `app/services/types.ts` - 76 lines, all shared types
+- `app/services/scoresService.ts` - 180 lines, score-related functions
+- `app/services/credentialsService.ts` - 109 lines, credential functions
+- `app/services/socialAccountsService.ts` - 122 lines, social account functions
+- `app/services/leaderboardService.ts` - 28 lines, leaderboard functions
+
+### Benefits Achieved
+- **Reduced Complexity**: 926 lines → 5 focused modules (~150 lines each)
 - **Single Responsibility**: Each service handles one domain
 - **Easier Testing**: Isolated functions per domain
 - **Better Maintainability**: Clear separation of concerns
-- **Focused Development**: Work on specific domains independently
+- **Removed Dead Code**: Eliminated unused Farcaster-specific functions
 
 ## File Organization Rules
 
 1. **Components**: Pure UI only, no business logic
 2. **Hooks**: All data fetching, caching, and business logic
-3. **Services**: External API abstractions, modular by domain
+3. **Services**: External API abstractions, now modular by domain
 4. **Lib**: Shared utilities, constants, and configurations
 5. **Planning**: All documentation and architectural decisions
 
@@ -179,5 +195,5 @@ This structure enables:
 - **Fast development** with clear separation of concerns
 - **Easy testing** with isolated business logic
 - **Maintainable code** with consistent patterns
-- **Reusable components** across different contexts
+- **Reusable components** across different contexts 
 - **Focused modules** with single responsibilities 
