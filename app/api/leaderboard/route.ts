@@ -11,14 +11,6 @@ type Profile = {
 export async function GET(req: NextRequest) {
   const apiKey = process.env.TALENT_API_KEY;
 
-  // Debug logging (remove after fixing)
-  console.log("Environment check:", {
-    hasApiKey: !!apiKey,
-    keyLength: apiKey?.length || 0,
-    nodeEnv: process.env.NODE_ENV,
-    allEnvKeys: Object.keys(process.env).filter(key => key.includes("TALENT"))
-  });
-
   if (!apiKey) {
     return NextResponse.json({ error: "Missing Talent API key" }, { status: 500 });
   }
