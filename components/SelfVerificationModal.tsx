@@ -4,15 +4,18 @@ import { v4 as uuidv4 } from "uuid";
 import { countries } from "@selfxyz/core";
 import { SelfQRcodeWrapper, SelfAppBuilder, type SelfApp } from "@selfxyz/qrcode";
 import { useEffect, useMemo, useState } from "react";
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Shield, CheckCircle, AlertCircle } from "lucide-react";
 
 interface SelfVerificationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onVerificationSuccess?: () => void;
 }
 
-export function SelfVerificationModal({ open, onOpenChange }: SelfVerificationModalProps) {
+export function SelfVerificationModal({ open, onOpenChange, onVerificationSuccess }: SelfVerificationModalProps) {
+  const { primaryWallet } = useDynamicContext();
   const [selfApp, setSelfApp] = useState<SelfApp | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<"pending" | "success" | "error">("pending");
   const excludedCountries = useMemo(() => [countries.NORTH_KOREA, countries.IRAN], []);
@@ -28,7 +31,7 @@ export function SelfVerificationModal({ open, onOpenChange }: SelfVerificationMo
           endpoint: "https://cannes.creatorscore.app/api/self-verification",
           logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
           userId: userId,
-          endpointType: "staging_https",
+          endpointType: "https",
           userIdType: "uuid",
           userDefinedData: JSON.stringify({ action: "creator-rewards" }),
           disclosures: {
@@ -51,6 +54,17 @@ export function SelfVerificationModal({ open, onOpenChange }: SelfVerificationMo
   const handleSuccess = () => {
     console.log("Verification successful");
     setVerificationStatus("success");
+
+    // Store verification result in localStorage
+    if (primaryWallet?.address) {
+      const verificationKey = `self_verification_${primaryWallet.address}`;
+      localStorage.setItem(verificationKey, "true");
+      localStorage.setItem(`${verificationKey}_timestamp`, new Date().toISOString());
+    }
+
+    // Call the success callback if provided
+    onVerificationSuccess?.();
+
     // Auto-close modal after 2 seconds on success
     setTimeout(() => {
       onOpenChange(false);

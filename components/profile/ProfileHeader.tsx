@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Avatar } from "@/components/ui/avatar";
+import { VerifiedAvatar } from "@/components/ui/VerifiedAvatar";
 import {
   Drawer,
   DrawerTrigger,
@@ -103,7 +103,14 @@ export function ProfileHeader({
       </div>
       {/* Right: Profile picture with badge overlay */}
       <div className="relative flex-shrink-0">
-        <Avatar src={image} fallback={name[0]} className="h-16 w-16" alt={name} size="lg" />
+        <VerifiedAvatar
+          src={image}
+          fallback={name[0]}
+          className="h-16 w-16"
+          alt={name}
+          size="lg"
+          walletAddress={primaryWallet?.address || undefined}
+        />
       </div>
     </div>
   );

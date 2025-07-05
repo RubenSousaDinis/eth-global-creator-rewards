@@ -6,12 +6,18 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SelfVerificationModal } from "@/components/SelfVerificationModal";
+import { OnchainPushCard } from "@/components/OnchainPushCard";
+import { useHumanityVerification } from "@/hooks/useHumanityVerification";
 import { Shield, Settings, Users } from "lucide-react";
 
 export default function SettingsPage() {
   const { primaryWallet, setShowAuthFlow } = useDynamicContext();
   const router = useRouter();
   const [showVerificationModal, setShowVerificationModal] = useState(false);
+
+  const { isVerified: humanityVerified, refetch: refetchVerification } = useHumanityVerification(
+    primaryWallet?.address
+  );
 
   const isLoggedIn = !!primaryWallet;
 
@@ -74,6 +80,9 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
+          {/* Onchain Push Card */}
+          <OnchainPushCard humanityVerified={humanityVerified} />
+
           {/* Coming Soon Card */}
           <Card>
             <CardHeader>
@@ -94,7 +103,11 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <SelfVerificationModal open={showVerificationModal} onOpenChange={setShowVerificationModal} />
+      <SelfVerificationModal
+        open={showVerificationModal}
+        onOpenChange={setShowVerificationModal}
+        onVerificationSuccess={refetchVerification}
+      />
     </div>
   );
 }
