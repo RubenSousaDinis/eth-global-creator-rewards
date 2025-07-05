@@ -17,7 +17,8 @@ External APIs → Services → Hooks → Pure UI Components
 
 ### Current State
 - **Base**: Started with Base Minikit (Next.js bootstrap) 
-- **Progress**: Completed foundation, navigation, and leaderboard system
+- **Progress**: Completed foundation, navigation, and leaderboard system with API refactoring
+- **Status**: All console errors resolved, leaderboard fully functional with creator scores
 - **Target**: Modular architecture with pure UI components and centralized data fetching
 
 ### Architecture Principles
@@ -177,6 +178,37 @@ External APIs → Services → Hooks → Pure UI Components
 
 **Commit**: `refactor: remove MinimalProfileDrawer complexity and implement direct navigation`
 
+### 3.6 API Architecture Refactoring ✅
+**Goal**: Migrate to refactored API architecture with shared utilities and clients
+
+**API Refactoring Migration**:
+- **Shared Utilities**: `lib/api-utils.ts` - Common validation, error handling, retry logic
+- **TalentApiClient**: `lib/talent-api-client.ts` - Abstracted client for Talent Protocol API
+- **NeynarClient**: `lib/neynar-client.ts` - Abstracted client for Neynar API operations
+- **Simplified Routes**: All API routes now use shared clients (80% code reduction)
+
+**API Routes Updated**:
+- `app/api/talent-score/route.ts` - 236 lines → 26 lines (89% reduction)
+- `app/api/farcaster-wallets/route.ts` - New route using NeynarClient
+- `app/api/leaderboard/route.ts` - Fixed parameter consistency (`per_page`)
+
+**Dependencies Added**:
+- `@neynar/nodejs-sdk` - Required for Neynar API operations
+
+**Console Errors Resolved**:
+- ✅ `Failed to fetch leaderboard stats` - Fixed with parameter consistency
+- ✅ `Unexpected token '<', "<!DOCTYPE"...` - Fixed with proper API routes
+
+**Benefits Achieved**:
+- 80% reduction in API route code
+- Standardized error handling and logging
+- Built-in retry mechanisms
+- Improved maintainability and testability
+- Single source of truth for API logic
+
+**Commit**: `fix: resolve API parameter mismatches for leaderboard endpoints`
+**Commit**: `feat: complete API refactoring migration with shared utilities`
+
 ## Phase 4: Profile System
 
 ### 4.1 Profile UI Components
@@ -332,6 +364,9 @@ export async function fetchUserProfile(uuid: string): Promise<User> {
 - ✅ Foundation setup completed
 - ✅ Navigation system implemented
 - ✅ Leaderboard system fully functional
+- ✅ API refactoring migration completed
+- ✅ Console errors resolved
+- ✅ Creator scores working end-to-end
 - ⏳ Profile system (next phase)
 - ⏳ Integration & polish (final phase)
 

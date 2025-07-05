@@ -28,7 +28,12 @@ export async function getUserWalletAddresses(
       };
     }
 
-    return data;
+    return {
+      addresses: data.addresses || [],
+      custodyAddress: data.custodyAddress || "",
+      primaryEthAddress: data.primaryEthAddress || null,
+      primarySolAddress: data.primarySolAddress || null,
+    };
   } catch (error) {
     console.error("Error fetching user wallet addresses:", error);
     return {

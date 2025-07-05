@@ -6,6 +6,26 @@ const nextConfig = {
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
   },
+
+  // Image optimization for external avatar sources
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**", // Allow all HTTPS domains
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "3000",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "3002",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

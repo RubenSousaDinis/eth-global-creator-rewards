@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import { getUserContext } from "@/lib/user-context";
 import type { LeaderboardEntry } from "@/app/services/types";
@@ -169,13 +169,11 @@ export default function LeaderboardPage() {
             <span className="text-sm font-medium w-6">
               #{pinnedUserEntry.rank}
             </span>
-            <Avatar className="h-8 w-8">
-              {pinnedUserEntry.pfp ? (
-                <AvatarImage src={pinnedUserEntry.pfp} />
-              ) : (
-                <AvatarFallback>{pinnedUserEntry.name[0]}</AvatarFallback>
-              )}
-            </Avatar>
+            <Avatar
+              src={pinnedUserEntry.pfp}
+              fallback={pinnedUserEntry.name[0]}
+              size="md"
+            />
             <div className="flex-1">
               <p className="font-medium text-sm">{pinnedUserEntry.name}</p>
               <p className="text-xs text-gray-600">
@@ -198,13 +196,7 @@ export default function LeaderboardPage() {
                 onClick={() => handleEntryClick(user)}
               >
                 <span className="text-sm font-medium w-6">#{user.rank}</span>
-                <Avatar className="h-8 w-8">
-                  {user.pfp ? (
-                    <AvatarImage src={user.pfp} />
-                  ) : (
-                    <AvatarFallback>{user.name[0]}</AvatarFallback>
-                  )}
-                </Avatar>
+                <Avatar src={user.pfp} fallback={user.name[0]} size="md" />
                 <div className="flex-1">
                   <p className="font-medium text-sm">{user.name}</p>
                   <p className="text-xs text-gray-600">
