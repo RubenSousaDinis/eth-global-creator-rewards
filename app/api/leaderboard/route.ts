@@ -10,18 +10,21 @@ type Profile = {
 
 export async function GET(req: NextRequest) {
   const apiKey = process.env.TALENT_API_KEY;
+
+  // Debug logging (remove after fixing)
+  console.log("Environment check:", {
+    hasApiKey: !!apiKey,
+    keyLength: apiKey?.length || 0,
+    nodeEnv: process.env.NODE_ENV,
+    allEnvKeys: Object.keys(process.env).filter(key => key.includes("TALENT"))
+  });
+
   if (!apiKey) {
-    return NextResponse.json(
-      { error: "Missing Talent API key" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Missing Talent API key" }, { status: 500 });
   }
   const { searchParams } = req.nextUrl;
   const page = parseInt(searchParams.get("page") || "1", 10);
-  const perPage = parseInt(
-    searchParams.get("per_page") || searchParams.get("perPage") || "25",
-    10,
-  ); // Use max allowed 25
+  const perPage = parseInt(searchParams.get("per_page") || searchParams.get("perPage") || "25", 10); // Use max allowed 25
   const statsOnly = searchParams.get("statsOnly") === "true";
 
   const baseUrl = "https://api.talentprotocol.com/search/advanced/profiles";
@@ -35,32 +38,32 @@ export async function GET(req: NextRequest) {
   } = {
     score: {
       min: 1,
-      scorer: "Creator Score",
-    },
+      scorer: "Creator Score"
+    }
   };
 
   const data = {
     query,
     sort: {
       score: { order: "desc", scorer: "Creator Score" },
-      id: { order: "desc" },
+      id: { order: "desc" }
     },
     page,
-    per_page: perPage,
+    per_page: perPage
   };
 
   const queryString = [
     `query=${encodeURIComponent(JSON.stringify(data.query))}`,
     `sort=${encodeURIComponent(JSON.stringify(data.sort))}`,
     `page=${page}`,
-    `per_page=${perPage}`,
+    `per_page=${perPage}`
   ].join("&");
 
   const res = await fetch(`${baseUrl}?${queryString}`, {
     headers: {
       Accept: "application/json",
-      "X-API-KEY": apiKey,
-    },
+      "X-API-KEY": apiKey
+    }
   });
   if (!res.ok) {
     const errorText = await res.text();
@@ -84,8 +87,8 @@ export async function GET(req: NextRequest) {
       // Include some debug info
       debug: {
         query: data.query,
-        paginationTotal: json.pagination?.total,
-      },
+        paginationTotal: json.pagination?.total
+      }
     });
   }
 
@@ -93,9 +96,7 @@ export async function GET(req: NextRequest) {
   const mapped = (json.profiles || []).map((profile: Profile) => {
     const p = profile;
     const creatorScores = Array.isArray(p.scores)
-      ? p.scores
-          .filter((s) => s.slug === "creator_score")
-          .map((s) => s.points ?? 0)
+      ? p.scores.filter(s => s.slug === "creator_score").map(s => s.points ?? 0)
       : [];
     const score = creatorScores.length > 0 ? Math.max(...creatorScores) : 0;
     return {
@@ -103,14 +104,12 @@ export async function GET(req: NextRequest) {
       pfp: p.image_url || undefined,
       score,
       rewards: "-", // To be calculated later
-      id: p.id,
+      id: p.id
     };
   });
 
   // Step 2: Sort by score descending
-  mapped.sort(
-    (a: { score: number }, b: { score: number }) => b.score - a.score,
-  );
+  mapped.sort((a: { score: number }, b: { score: number }) => b.score - a.score);
 
   // Step 3: Assign ranks
   let lastScore: number | null = null;
@@ -130,7 +129,7 @@ export async function GET(req: NextRequest) {
     }
     return {
       ...entry,
-      rank,
+      rank
     };
   });
 
