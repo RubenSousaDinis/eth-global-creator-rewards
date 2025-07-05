@@ -1,21 +1,9 @@
-import { SelfBackendVerifier, InMemoryConfigStore, AllIds } from "@selfxyz/core";
+import { SelfBackendVerifier, InMemoryConfigStore, AllIds, DefaultConfigStore } from "@selfxyz/core";
 import { NextRequest, NextResponse } from "next/server";
 import { BigNumberish } from "ethers";
 
 // Configure dynamic verification based on user context
-const configStorage = new InMemoryConfigStore(async (userIdentifier: string, userDefinedData: string) => {
-  const context = JSON.parse(userDefinedData);
-
-  switch (context.action) {
-    case "creator-rewards":
-      return "adult_human_verification";
-    default:
-      return "adult_human_verification";
-  }
-});
-
-// Set up different verification configurations
-await configStorage.setConfig("adult_human_verification", {
+const configStore = new DefaultConfigStore({
   minimumAge: 18,
   excludedCountries: ["IRN", "PRK"],
   ofac: true
@@ -27,21 +15,24 @@ const verifier = new SelfBackendVerifier(
   "https://cannes.creatorscore.app/api/self-verification", // Your verification endpoint
   false, // Production mode (real passports)
   AllIds, // Accept all document types
-  configStorage, // Dynamic configuration
+  configStore, // Dynamic configuration
   "uuid" // User identifier type
 );
 
 export async function POST(request: NextRequest) {
   try {
-    const { attestationId, proof, pubSignals, userContextData } = await request.json();
+    const body = await request.json();
+    console.log("body", body);
+    const { attestationId, proof, publicSignals, userContextData } = body;
 
     // Validate input
-    if (!attestationId || !proof || !pubSignals || !userContextData) {
+    console.log("test", attestationId, proof, publicSignals, userContextData);
+    if (!attestationId || !proof || !publicSignals || !userContextData) {
       return NextResponse.json({ error: "Missing required verification parameters" }, { status: 400 });
     }
 
     // Verify the proof
-    const result = await verifier.verify(attestationId, proof, pubSignals as BigNumberish[], userContextData);
+    const result = await verifier.verify(attestationId, proof, publicSignals as BigNumberish[], userContextData);
 
     // Check overall verification result
     if (!result.isValidDetails.isValid) {
@@ -57,24 +48,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "OFAC sanctions check failed" }, { status: 403 });
     }
 
-    // Parse user context to understand the request
-    const userContext = JSON.parse(result.userData.userDefinedData);
-
     // Verification successful - return relevant information
-    return NextResponse.json({
-      verified: true,
-      verificationId: result.discloseOutput.nullifier,
-      userIdentifier: result.userData.userIdentifier,
-      nationality: result.discloseOutput.nationality,
-      ageVerified: result.isValidDetails.isMinimumAgeValid,
-      context: userContext,
-      // Include disclosed information based on your requirements
-      disclosedData: {
-        name: result.discloseOutput.name,
-        dateOfBirth: result.discloseOutput.dateOfBirth,
-        issuingState: result.discloseOutput.issuingState
-      }
-    });
+    return NextResponse.json(
+      {
+        status: "success",
+        result: true,
+        verified: true,
+        verificationId: result.discloseOutput.nullifier,
+        userIdentifier: result.userData.userIdentifier,
+        nationality: result.discloseOutput.nationality,
+        ageVerified: result.isValidDetails.isMinimumAgeValid,
+        // Include disclosed information based on your requirements
+        disclosedData: {
+          name: result.discloseOutput.name,
+          dateOfBirth: result.discloseOutput.dateOfBirth,
+          issuingState: result.discloseOutput.issuingState
+        }
+      },
+      { status: 200 }
+    );
   } catch (error: any) {
     console.error("Verification error:", error);
 

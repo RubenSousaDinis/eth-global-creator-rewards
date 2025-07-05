@@ -4,6 +4,7 @@
 
 - **Principle:** Our apps are optimized for fast, consistent building by "vibe coders" - reusability over customization.
 - **User Identification:** Users are identified by a canonical Talent UUID, but can log in or be found via Farcaster, GitHub, or wallet.
+- **Dual Authentication:** Automatic environment detection enables Farcaster authentication within MiniApps and Dynamic wallet authentication in browsers, with wallet addresses serving as universal identifiers for reputation scoring.
 - **Shared Utilities:** All user lookups and profile loads go through a single resolver that abstracts away the identifier type (Farcaster, GitHub, wallet, Talent UUID). Common logic is extracted into shared services for maintainability and testability.
 - **Leaderboard UX:** The current user is always pinned to the top of the leaderboard. Special badges (e.g., "New Builder", "Hall of Fame") can be used to highlight user status and achievements.
 - **Advanced Search Callout:** The search page includes a blue callout for advanced search, linking to Talent Index.
@@ -72,10 +73,12 @@ External APIs → API Clients → Services → API Routes → Hooks → Pure UI 
 - **Canonical ID**: Talent UUID is the primary identifier for all users
 - **Multi-identifier Support**: Users found via Farcaster, GitHub, wallet, or UUID
 - **Universal Resolver**: Single abstraction handles all identifier types
+- **Unified Authentication**: Automatic detection between Farcaster (MiniApp) and Dynamic (browser) contexts with seamless user experience
 
 ### Tech Stack & Performance
 
 - **Framework**: Next.js 14 (App Router), React 18+, shadcn/ui, Tailwind CSS
+- **Authentication**: MiniKit (Farcaster) + Dynamic SDK (wallet-only authentication)
 - **State Management**: React hooks + context (no external state library)
 - **Caching**: Custom hook-based caching with appropriate TTLs
 - **TypeScript**: Strict mode with comprehensive typing throughout

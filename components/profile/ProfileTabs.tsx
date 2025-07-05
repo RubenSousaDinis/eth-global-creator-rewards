@@ -26,21 +26,8 @@ export function ProfileTabs({ accountsCount, socialAccounts, talentUUID }: Profi
   );
 
   return (
-    <Tabs defaultValue="content" className="w-full flex flex-col">
+    <Tabs defaultValue="accounts" className="w-full flex flex-col">
       <TabsList className="w-full justify-start bg-transparent p-0 h-auto gap-6">
-        <TabsTrigger
-          value="content"
-          className={cn(
-            "relative px-0 py-2 text-base font-medium",
-            "data-[state=active]:bg-transparent data-[state=active]:shadow-none",
-            "data-[state=active]:text-foreground data-[state=active]:after:absolute",
-            "data-[state=active]:after:bottom-0 data-[state=active]:after:left-0",
-            "data-[state=active]:after:right-0 data-[state=active]:after:h-0.5",
-            "data-[state=active]:after:bg-primary"
-          )}
-        >
-          Content
-        </TabsTrigger>
         <TabsTrigger
           value="accounts"
           className={cn(
@@ -73,10 +60,20 @@ export function ProfileTabs({ accountsCount, socialAccounts, talentUUID }: Profi
             {credentialsCount}
           </Badge>
         </TabsTrigger>
+        <TabsTrigger
+          value="content"
+          className={cn(
+            "relative px-0 py-2 text-base font-medium",
+            "data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+            "data-[state=active]:text-foreground data-[state=active]:after:absolute",
+            "data-[state=active]:after:bottom-0 data-[state=active]:after:left-0",
+            "data-[state=active]:after:right-0 data-[state=active]:after:h-0.5",
+            "data-[state=active]:after:bg-primary"
+          )}
+        >
+          Content
+        </TabsTrigger>
       </TabsList>
-      <TabsContent value="content" className="mt-6 p-2">
-        <DeployedPosts talentIdentifier={talentUUID} />
-      </TabsContent>
       <TabsContent value="accounts" className="mt-6 p-2">
         <AccountGrid socialAccounts={socialAccounts} />
       </TabsContent>
@@ -84,6 +81,9 @@ export function ProfileTabs({ accountsCount, socialAccounts, talentUUID }: Profi
         <ScoreProgressAccordion talentUUID={talentUUID} />
         <CredentialIdeasCallout />
         <ScoreDataPoints talentUUID={talentUUID} />
+      </TabsContent>
+      <TabsContent value="content" className="mt-6 p-2">
+        <DeployedPosts talentIdentifier={talentUUID} />
       </TabsContent>
     </Tabs>
   );
