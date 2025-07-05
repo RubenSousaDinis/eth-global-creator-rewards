@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useDeployedPostsData } from "@/hooks/useDeployedPosts";
 import { useOriginUrlData } from "@/hooks/useOriginUrl";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, FileText, Copy, Calendar, Hash } from "lucide-react";
 import { cn } from "@/lib/utils";
