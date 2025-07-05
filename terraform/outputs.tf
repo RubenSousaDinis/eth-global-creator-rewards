@@ -42,7 +42,7 @@ output "custom_domain_name" {
 
 output "cloudfront_distribution_domain" {
   description = "CloudFront distribution domain name"
-  value       = module.open_next.cloudfront_distribution_domain_name
+  value       = replace(module.open_next.cloudfront_url, "https://", "")
 }
 
 output "certificate_arn" {

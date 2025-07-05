@@ -1,0 +1,66 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: ERC721FactoryOld
+    network: base
+    source:
+      address: "0xb7a72146c3d225fce86797191d3c8c674bc8d58e"
+      abi: ERC721Factory
+      startBlock: 5348012
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ContractDeployed
+      abis:
+        - name: ERC721Factory
+          file: ./abis/ERC721Factory.json
+      eventHandlers:
+        - event: ContractDeployed((string,string,address,address,address,uint256,uint256),indexed address,string,uint256,uint256)
+          handler: handleContractDeployed
+      file: ./src/erc-721-factory.ts
+  - kind: ethereum
+    name: ERC721Factory
+    network: base
+    source:
+      address: "0x9bf9d0d88c1a835f1052ef0fba325b35bbea127a"
+      abi: ERC721Factory
+      startBlock: 5991685
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ContractDeployed
+      abis:
+        - name: ERC721Factory
+          file: ./abis/ERC721Factory.json
+      eventHandlers:
+        - event: ContractDeployed((string,string,address,address,address,uint256,uint256),indexed address,string,uint256,uint256)
+          handler: handleContractDeployed
+      file: ./src/erc-721-factory.ts
+  - kind: ethereum
+    name: FeeManager
+    network: base
+    source:
+      address: "0x54A57E8Cee1c443d3090F901e85741e4E3Cadba1"
+      abi: FeeManager
+      startBlock: 5348001
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - FeeDistributed
+      abis:
+        - name: FeeManager
+          file: ./abis/FeeManager.json
+      eventHandlers:
+        - event: FeeDistributed(indexed address,indexed address,indexed address,uint256,string)
+          handler: handleFeeDistributed
+      file: ./src/fee-manager.ts

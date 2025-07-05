@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "app_name" {
   description = "Name of the application"
   type        = string
-  default     = "aws-deploy-test"
+  default     = "creator-rewards"
 }
 
 variable "domain_name" {
@@ -33,7 +33,7 @@ variable "tags" {
   type        = map(string)
   default = {
     Environment = "production"
-    Project     = "aws-deploy-test"
+    Project     = "creator-rewards"
   }
 }
 
@@ -78,7 +78,7 @@ variable "db_max_allocated_storage" {
 variable "db_name" {
   description = "Name of the database"
   type        = string
-  default     = "appdb"
+  default     = "creator_rewards"
 }
 
 variable "db_username" {
@@ -91,6 +91,21 @@ variable "db_password" {
   description = "Database master password"
   type        = string
   sensitive   = true
+  
+  validation {
+    condition     = length(var.db_password) >= 8 && length(var.db_password) <= 41
+    error_message = "Database password must be between 8 and 41 characters long."
+  }
+  
+  validation {
+    condition     = can(regex(".*[A-Z].*", var.db_password)) && can(regex(".*[a-z].*", var.db_password)) && can(regex(".*[0-9].*", var.db_password))
+    error_message = "Database password must contain at least one uppercase letter, one lowercase letter, and one number."
+  }
+  
+  validation {
+    condition     = !can(regex("[\\/@\" ]", var.db_password))
+    error_message = "Database password cannot contain '/', '@', '\"', or spaces. Only printable ASCII characters are allowed."
+  }
 }
 
 variable "environment" {
@@ -109,4 +124,19 @@ variable "nextauth_secret" {
   description = "NextAuth secret for JWT signing"
   type        = string
   sensitive   = true
-} 
+}
+
+# OpenNext Configuration
+variable "open_next_prefix" {
+  description = "Prefix for OpenNext resources (affects bucket and distribution names)"
+  type        = string
+  default     = "creator-rewards"
+}
+
+variable "open_next_folder_path" {
+  description = "Path to the .open-next folder"
+  type        = string
+  default     = "../.open-next"
+}
+
+ 

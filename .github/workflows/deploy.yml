@@ -2,152 +2,152 @@ name: Deploy to AWS
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
-  NODE_VERSION: '20'
-  AWS_REGION: 'eu-west-1'
+  NODE_VERSION: "20"
+  AWS_REGION: "eu-west-1"
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run linting
-      run: npm run lint
+      - name: Run linting
+        run: npm run lint
 
-    - name: Run type checking
-      run: npx tsc --noEmit
+      - name: Run type checking
+        run: npx tsc --noEmit --project tsconfig.ci.json
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Setup AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+      - name: Setup AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Install Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: "1.7.0"
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
 
-    - name: Clean up previous build artifacts
-      run: |
-        rm -rf .open-next
-        rm -rf .next
+      - name: Clean up previous build artifacts
+        run: |
+          rm -rf .open-next
+          rm -rf .next
 
-    - name: Build Next.js application
-      run: |
-        npm run build
-        echo "✅ Next.js build completed"
-        ls -la .next/
-        npm run build:open-next
-        echo "✅ OpenNext build completed"
-        ls -la .open-next/
-      env:
-        NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-        NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+      - name: Build Next.js application
+        run: |
+          npm run build
+          echo "✅ Next.js build completed"
+          ls -la .next/
+          npm run build:open-next
+          echo "✅ OpenNext build completed"
+          ls -la .open-next/
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
 
-    - name: Verify OpenNext build output
-      run: |
-        if [ ! -d ".open-next/server-functions" ]; then
-          echo "❌ .open-next/server-functions directory is missing!"
-          echo "📁 Contents of .open-next:"
-          ls -la .open-next/ || echo "No .open-next directory found"
-          echo "📁 Contents of .next:"
-          ls -la .next/ || echo "No .next directory found"
-          exit 1
-        fi
-        echo "✅ OpenNext build output verified"
-        echo "📁 Server functions found:"
-        ls -la .open-next/server-functions/
-        echo "📄 OpenNext output configuration:"
-        cat .open-next/open-next.output.json
-        
-        # Create server-function symlink for Terraform compatibility
-        echo "🔗 Creating server-function symlink for Terraform compatibility"
-        cd .open-next
-        # Remove old symlink if it exists
-        rm -f server-function
-        # Create symlink from server-function to server-functions/default
-        ln -s server-functions/default server-function
-        echo "✅ Symlink created: server-function -> server-functions/default"
-        ls -la server-function
-        cd ..
+      - name: Verify OpenNext build output
+        run: |
+          if [ ! -d ".open-next/server-functions" ]; then
+            echo "❌ .open-next/server-functions directory is missing!"
+            echo "📁 Contents of .open-next:"
+            ls -la .open-next/ || echo "No .open-next directory found"
+            echo "📁 Contents of .next:"
+            ls -la .next/ || echo "No .next directory found"
+            exit 1
+          fi
+          echo "✅ OpenNext build output verified"
+          echo "📁 Server functions found:"
+          ls -la .open-next/server-functions/
+          echo "📄 OpenNext output configuration:"
+          cat .open-next/open-next.output.json
 
-    - name: Deploy with Terraform
-      working-directory: ./terraform
-      run: |
-        rm -rf .terraform .terraform.lock.hcl
-        terraform init
-        terraform plan -var="environment=production" -var="aws_region=eu-west-1" -out=tfplan
-        terraform apply -auto-approve tfplan
-      env:
-        TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
-        TF_VAR_nextauth_secret: ${{ secrets.NEXTAUTH_SECRET }}
+          # Create server-function symlink for Terraform compatibility
+          echo "🔗 Creating server-function symlink for Terraform compatibility"
+          cd .open-next
+          # Remove old symlink if it exists
+          rm -f server-function
+          # Create symlink from server-function to server-functions/default
+          ln -s server-functions/default server-function
+          echo "✅ Symlink created: server-function -> server-functions/default"
+          ls -la server-function
+          cd ..
 
-    - name: Get deployment URL and update environment
-      id: get-url
-      run: |
-        # Get the CloudFront URL from Terraform output
-        cd terraform
-        DEPLOY_URL=$(terraform output -json open_next_outputs | jq -r '.cloudfront_url // "Deployment URL not available"')
-        echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+      - name: Deploy with Terraform
+        working-directory: ./terraform
+        run: |
+          rm -rf .terraform .terraform.lock.hcl
+          terraform init
+          terraform plan -var="environment=production" -var="aws_region=eu-west-1" -out=tfplan
+          terraform apply -auto-approve tfplan
+        env:
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_nextauth_secret: ${{ secrets.NEXTAUTH_SECRET }}
 
-    - name: Comment deployment URL
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const commentBody = `🚀 **Deployment completed successfully!**
-          
-          🌐 **Application URL:** ${{ steps.get-url.outputs.deploy_url }}
-          
-          📅 **Deployed at:** ${new Date().toISOString()}
-          🔗 **Commit:** ${context.sha.substring(0, 7)}
-          
-          ---
-          *This deployment was triggered by a push to the main branch.*`;
-          
-          // Try to comment on the commit
-          try {
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: commentBody
-            });
-          } catch (error) {
-            console.log('Could not comment on commit, this is normal for direct pushes');
-          } 
+      - name: Get deployment URL and update environment
+        id: get-url
+        run: |
+          # Get the CloudFront URL from Terraform output
+          cd terraform
+          DEPLOY_URL=$(terraform output -json open_next_outputs | jq -r '.cloudfront_url // "Deployment URL not available"')
+          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+
+      - name: Comment deployment URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commentBody = `🚀 **Deployment completed successfully!**
+
+            🌐 **Application URL:** ${{ steps.get-url.outputs.deploy_url }}
+
+            📅 **Deployed at:** ${new Date().toISOString()}
+            🔗 **Commit:** ${context.sha.substring(0, 7)}
+
+            ---
+            *This deployment was triggered by a push to the main branch.*`;
+
+            // Try to comment on the commit
+            try {
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: commentBody
+              });
+            } catch (error) {
+              console.log('Could not comment on commit, this is normal for direct pushes');
+            }

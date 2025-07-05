@@ -8,7 +8,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "aws-deploy-test-terraform-state"
+    bucket = "eth-global-creator-rewards-terraform-state"
     key    = "terraform.tfstate"
     region = "eu-west-1"
     encrypt = true
@@ -108,6 +108,7 @@ resource "aws_db_instance" "database" {
   maintenance_window     = "sun:04:00-sun:05:00"
 
   skip_final_snapshot = var.environment == "development"
+  final_snapshot_identifier = var.environment == "development" ? null : "${var.app_name}-db-final-snapshot-${formatdate("YYYY-MM-DD-HH-MM", timestamp())}"
   deletion_protection = var.environment == "production"
 
   tags = var.tags
@@ -115,7 +116,7 @@ resource "aws_db_instance" "database" {
 
 # Parameter group for PostgreSQL
 resource "aws_db_parameter_group" "database" {
-  family = "postgres15"
+  family = "postgres16"
   name   = "${var.app_name}-db-params"
 
   parameter {
@@ -136,8 +137,8 @@ module "open_next" {
   source  = "RJPearson94/open-next/aws//modules/tf-aws-open-next-zone"
   version = "3.1.0"
 
-  prefix = "myapp-rubendinis-${random_id.suffix.hex}"
-  folder_path = "../.open-next"
+  prefix = "creator-rewards"
+  folder_path = var.open_next_folder_path
 
   # Server function configuration
   server_function = {
@@ -160,10 +161,6 @@ module "open_next" {
     aws.dns            = aws
     aws.global         = aws
   }
-}
-
-resource "random_id" "suffix" {
-  byte_length = 4
 }
 
 # Custom domain configuration (only if domain_name is provided)
@@ -212,6 +209,11 @@ data "aws_route53_zone" "custom_domain" {
   name  = var.hosted_zone
 }
 
+# Data source to get CloudFront hosted zone ID
+data "aws_cloudfront_distribution" "main" {
+  id = module.open_next.cloudfront_distribution_id
+}
+
 # Route53 A record for the custom domain
 resource "aws_route53_record" "custom_domain" {
   count = var.domain_name != null ? 1 : 0
@@ -221,8 +223,8 @@ resource "aws_route53_record" "custom_domain" {
   type    = "A"
 
   alias {
-    name                   = module.open_next.cloudfront_distribution_domain_name
-    zone_id                = module.open_next.cloudfront_distribution_hosted_zone_id
+    name                   = replace(module.open_next.cloudfront_url, "https://", "")
+    zone_id                = data.aws_cloudfront_distribution.main.hosted_zone_id
     evaluate_target_health = false
   }
 } 

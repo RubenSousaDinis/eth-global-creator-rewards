@@ -1,0 +1,29 @@
+type ContractDeployed @entity(immutable: true) {
+  id: Bytes!
+  mintData_name_: String! # string
+  mintData_symbol_: String! # string
+  mintData_ownerAddr: Bytes! # address
+  mintData_minterAddr: Bytes! # address
+  mintData_creatorReferrerAddr: Bytes! # address
+  mintData_maxSupply: BigInt! # uint256
+  mintData_priceWei: BigInt! # uint256
+  clone: Bytes! # address
+  postId: String! # string
+  from: BigInt! # uint256
+  to: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type FeeDistributed @entity(immutable: true) {
+  id: Bytes!
+  minter: Bytes! # string
+  caller: Bytes! # uint256
+  recipient: Bytes!
+  amount: BigInt!
+  feeType: String!
+  blockTimestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
