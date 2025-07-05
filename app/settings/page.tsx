@@ -1,17 +1,17 @@
 "use client";
 
-import { v4 as uuidv4 } from "uuid";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useRouter } from "next/navigation";
-import { countries } from "@selfxyz/core";
-import { SelfQRcodeWrapper, SelfAppBuilder, type SelfApp } from "@selfxyz/qrcode";
-import { useEffect, useMemo, useState } from "react";
-
-const userId = uuidv4();
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SelfVerificationModal } from "@/components/SelfVerificationModal";
+import { Shield, Settings, Users } from "lucide-react";
 
 export default function SettingsPage() {
   const { primaryWallet, setShowAuthFlow } = useDynamicContext();
   const router = useRouter();
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
 
   const isLoggedIn = !!primaryWallet;
 
@@ -28,67 +28,73 @@ export default function SettingsPage() {
   if (!isLoggedIn) {
     return null;
   }
-  const [selfApp, setSelfApp] = useState<SelfApp | null>(null);
-  const excludedCountries = useMemo(() => [countries.NORTH_KOREA, countries.IRAN], []);
-
-  useEffect(() => {
-    try {
-      const app = new SelfAppBuilder({
-        version: 2,
-        appName: "Creator Rewards",
-        scope: "creator-rewards",
-        endpoint: "https://cannes.creatorscore.app/api/self-verification",
-        logoBase64: "https://i.postimg.cc/mrmVf9hm/self.png",
-        userId: userId,
-        endpointType: "staging_https",
-        userIdType: "uuid",
-        userDefinedData: JSON.stringify({ action: "creator-rewards" }),
-        disclosures: {
-          minimumAge: 18,
-          nationality: true,
-          gender: true,
-          excludedCountries: excludedCountries
-        }
-      }).build();
-
-      setSelfApp(app);
-    } catch (error) {
-      console.error("Failed to initialize Self app:", error);
-    }
-  }, []);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">Settings</h1>
+      <div className="space-y-8">
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-2">
+            <Settings className="w-8 h-8 text-primary" />
+            <h1 className="text-4xl font-bold tracking-tight">Settings</h1>
+          </div>
           <p className="text-xl text-muted-foreground">Configure your Creator Score preferences</p>
         </div>
 
-        <div className="text-center text-sm text-muted-foreground">
-          <p>🚧 More settings options coming soon</p>
-        </div>
+        <div className="grid gap-6">
+          {/* Identity Verification Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-blue-500" />
+                Self Verification
+              </CardTitle>
+              <CardDescription>
+                <strong>Verification is required to receive Rewards.</strong> Verify your identity using Self to prove
+                you're a real person and unlock the weekly rewards.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground mb-2">What you'll get after verification:</p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Access to Creator Rewards airdrops</li>
+                    <li>• Verified creator badge</li>
+                    <li>• Enhanced security and trust in the platform</li>
+                  </ul>
+                  <p className="text-sm text-orange-600 mt-3 font-medium">
+                    ⚠️ You must complete verification to use receive rewards.
+                  </p>
+                </div>
+                <Button onClick={() => setShowVerificationModal(true)} className="w-full sm:w-auto">
+                  <Shield className="w-4 h-4 mr-2" />
+                  Verify Identity
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-        <div className="flex flex-col items-center justify-center">
-          <h2 className="text-2xl font-bold tracking-tight pb-5">Self Verification</h2>
-          {selfApp ? (
-            <SelfQRcodeWrapper
-              selfApp={selfApp}
-              onSuccess={() => {
-                console.log("Verification successful");
-                // Perform actions after successful verification
-              }}
-              onError={() => {
-                console.error("Error: Failed to verify identity");
-              }}
-            />
-          ) : (
-            <div className="w-[256px] h-[256px] bg-gray-200 animate-pulse flex items-center justify-center">
-              <p className="text-gray-500 text-sm">Loading QR Code...</p>
-            </div>
-          )}
+          {/* Coming Soon Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-gray-500" />
+                More Settings
+              </CardTitle>
+              <CardDescription>Additional configuration options coming soon</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <p className="text-sm text-muted-foreground">
+                  🚧 More settings and configuration options will be available soon
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
+
+      <SelfVerificationModal open={showVerificationModal} onOpenChange={setShowVerificationModal} />
     </div>
   );
 }
