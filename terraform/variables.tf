@@ -13,7 +13,7 @@ variable "app_name" {
 variable "domain_name" {
   description = "Custom domain name for the application (optional)"
   type        = string
-  default     = "cannes.creatorscore.app"
+  default     = null
 }
 
 variable "hosted_zone" {
