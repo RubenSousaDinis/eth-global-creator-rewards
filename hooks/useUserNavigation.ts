@@ -8,37 +8,41 @@ import { User, Trophy, Settings } from "lucide-react";
 
 export function useUserNavigation() {
   const { context } = useMiniKit();
-  const { user: dynamicUser, primaryWallet } = useDynamicContext();
+  const { primaryWallet } = useDynamicContext();
 
   // Get unified user context (memoized to prevent unnecessary re-computations)
   const user: UnifiedUserContext | undefined = useMemo(() => {
-    return getUserContext(context, primaryWallet || dynamicUser, !!primaryWallet);
-  }, [context, primaryWallet, dynamicUser]);
+    return getUserContext(context, primaryWallet, !!primaryWallet);
+  }, [context, primaryWallet]);
 
   // Determine canonical identifier for routing (memoized)
   const canonical = useMemo(() => {
     return user?.username || user?.fid?.toString() || user?.wallet;
   }, [user]);
 
+  // Navigation items are ALWAYS enabled - auth is handled at the click level
   const navItems = useMemo(
     () => [
       {
-        href: canonical ? `/${canonical}` : undefined,
+        href: canonical ? `/${canonical}` : "/profile",
         icon: User,
         label: "Profile",
-        disabled: !canonical
+        disabled: false,
+        requiresAuth: true // Flag to indicate this needs auth
       },
       {
         href: "/leaderboard",
         icon: Trophy,
         label: "Leaderboard",
-        disabled: false
+        disabled: false,
+        requiresAuth: false
       },
       {
         href: "/settings",
         icon: Settings,
         label: "Settings",
-        disabled: !canonical
+        disabled: false,
+        requiresAuth: true // Flag to indicate this needs auth
       }
     ],
     [canonical]

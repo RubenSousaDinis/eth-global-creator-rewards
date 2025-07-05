@@ -30,8 +30,8 @@ function getCountdownParts(target: Date) {
 
 export default function LeaderboardPage() {
   const { context } = useMiniKit();
-  const { user: dynamicUser, primaryWallet } = useDynamicContext();
-  const user = getUserContext(context, primaryWallet || dynamicUser, !!primaryWallet);
+  const { primaryWallet } = useDynamicContext();
+  const user = getUserContext(context, primaryWallet, !!primaryWallet);
   const router = useRouter();
 
   // Use new hooks for data fetching
@@ -39,8 +39,50 @@ export default function LeaderboardPage() {
   const { entries, loading, error, hasMore, loadMore } = useLeaderboard(10);
   const { stats, loading: statsLoading } = useLeaderboardStats();
 
+  // State for resolved user info from Talent API
+  const [resolvedUser, setResolvedUser] = useState<{
+    displayName: string;
+    profileImage?: string;
+    walletAddress: string;
+  } | null>(null);
+
   // Countdown state
   const [countdown, setCountdown] = useState(() => getCountdownParts(ROUND_ENDS_AT));
+
+  // Resolve wallet address to user info using Talent API
+  useEffect(() => {
+    if (user?.wallet) {
+      import("@/lib/user-resolver").then(({ resolveTalentUser }) => {
+        resolveTalentUser(user.wallet!)
+          .then(talentUser => {
+            if (talentUser) {
+              setResolvedUser({
+                displayName:
+                  talentUser.display_name ||
+                  talentUser.fname ||
+                  talentUser.github ||
+                  `${user.wallet!.slice(0, 6)}...${user.wallet!.slice(-4)}`,
+                profileImage: talentUser.image_url || undefined,
+                walletAddress: user.wallet!
+              });
+            } else {
+              // Fallback to truncated wallet address
+              setResolvedUser({
+                displayName: `${user.wallet!.slice(0, 6)}...${user.wallet!.slice(-4)}`,
+                walletAddress: user.wallet!
+              });
+            }
+          })
+          .catch(() => {
+            // Fallback to truncated wallet address on error
+            setResolvedUser({
+              displayName: `${user.wallet!.slice(0, 6)}...${user.wallet!.slice(-4)}`,
+              walletAddress: user.wallet!
+            });
+          });
+      });
+    }
+  }, [user?.wallet]);
 
   // Hide Farcaster Mini App splash screen when ready
   useEffect(() => {
@@ -55,14 +97,15 @@ export default function LeaderboardPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Find user entry in leaderboard data (if present)
-  const userLeaderboardEntry = user && entries.find(e => e.name === (user.displayName || user.username));
+  // Find user entry in leaderboard data using resolved display name or wallet address
+  const userLeaderboardEntry =
+    resolvedUser && entries.find(e => e.name === resolvedUser.displayName || e.wallet === resolvedUser.walletAddress);
 
-  // Always show the user pinned at the top
-  const pinnedUserEntry = user && {
+  // Show the user pinned at the top only if user is connected
+  const pinnedUserEntry = resolvedUser && {
     rank: userLeaderboardEntry ? userLeaderboardEntry.rank : "—",
-    name: user.displayName || user.username || "Unknown user",
-    pfp: user.pfpUrl || undefined,
+    name: resolvedUser.displayName,
+    pfp: resolvedUser.profileImage || user?.pfpUrl || undefined,
     rewards: "-", // To be calculated later
     score: creatorScore ?? 0,
     id: userLeaderboardEntry ? userLeaderboardEntry.id : "user-pinned"

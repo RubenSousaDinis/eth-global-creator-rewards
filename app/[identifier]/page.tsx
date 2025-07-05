@@ -10,7 +10,8 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   if (RESERVED_WORDS.includes(identifier)) {
     return null;
   }
-  // Show loading spinner while resolving user
+
+  // Try to resolve user with existing Talent API logic
   const userPromise = resolveTalentUser(identifier);
   const user = await userPromise;
   if (!user || !user.id) {

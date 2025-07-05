@@ -47,7 +47,6 @@ creator-score-miniapp/
     navigation/                  # Navigation components
       BottomNav.tsx              # Mobile bottom navigation
       Header.tsx                 # Top header with user info
-      InfoModal.tsx              # About/info modal
     profile/                     # Profile UI components (REFACTORED: ProfileTabs modularized)
       AccountCard.tsx            # Social account display card
       AccountGrid.tsx            # Grid of social accounts

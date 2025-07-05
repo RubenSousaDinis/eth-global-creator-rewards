@@ -75,11 +75,12 @@ function extractWalletAddress(obj: unknown): string | undefined {
 
 /**
  * Get unified user context from both Farcaster and Dynamic sources
+ * Simplified: Dynamic only provides wallet address via connection (no signing required)
  */
 export function getUserContext(
   farcasterContext: { user?: FarcasterUserContext } | null,
-  dynamicWalletOrUser: unknown,
-  isDynamicAuthenticated: boolean
+  dynamicPrimaryWallet: unknown,
+  isConnected: boolean
 ): UnifiedUserContext | undefined {
   // Priority 1: Farcaster context (when in Farcaster environment)
   if (farcasterContext?.user && isFarcasterEnvironment()) {
@@ -92,15 +93,16 @@ export function getUserContext(
     };
   }
 
-  // Priority 2: Dynamic context (when authenticated)
-  if (isDynamicAuthenticated && dynamicWalletOrUser) {
+  // Priority 2: Dynamic context (when wallet is connected - no signing required)
+  // Just extract wallet address - let Talent API handle the rest
+  if (dynamicPrimaryWallet && isConnected) {
     let walletAddress: string | undefined;
 
     // Handle different input types
-    if (typeof dynamicWalletOrUser === "string") {
-      walletAddress = dynamicWalletOrUser;
+    if (typeof dynamicPrimaryWallet === "string") {
+      walletAddress = dynamicPrimaryWallet;
     } else {
-      walletAddress = extractWalletAddress(dynamicWalletOrUser);
+      walletAddress = extractWalletAddress(dynamicPrimaryWallet);
     }
 
     if (walletAddress) {
@@ -118,7 +120,7 @@ export function getUserContext(
  * React hook to get unified user context
  */
 export function useUnifiedUserContext(): UnifiedUserContext | undefined {
-  const { user: dynamicUser } = useDynamicContext();
+  const { primaryWallet } = useDynamicContext();
 
-  return getUserContext(null, dynamicUser, !!dynamicUser);
+  return getUserContext(null, primaryWallet, !!primaryWallet);
 }

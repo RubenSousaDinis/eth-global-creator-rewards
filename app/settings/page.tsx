@@ -2,6 +2,9 @@
 
 import { SelfQRcodeWrapper, SelfAppBuilder } from "@selfxyz/qrcode";
 import { v4 as uuidv4 } from "uuid";
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const userId = uuidv4();
 
@@ -24,15 +27,38 @@ const selfApp = new SelfAppBuilder({
 }).build();
 
 export default function SettingsPage() {
+  const { primaryWallet, setShowAuthFlow } = useDynamicContext();
+  const router = useRouter();
+
+  const isLoggedIn = !!primaryWallet;
+
+  // Check auth on mount and redirect if not logged in
+  useEffect(() => {
+    if (!isLoggedIn) {
+      // Redirect to home and trigger login modal
+      router.replace("/");
+      setShowAuthFlow(true);
+    }
+  }, [isLoggedIn, router, setShowAuthFlow]);
+
+  // Don't render content if not logged in
+  if (!isLoggedIn) {
+    return null;
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="text-center space-y-6">
-        <h1 className="text-4xl font-bold tracking-tight">Settings</h1>
-        <p className="text-xl text-muted-foreground">Configure your Creator Score preferences</p>
-        <div className="text-sm text-muted-foreground">
-          <p>🚧 Coming soon: Settings configuration options</p>
+      <div className="space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold tracking-tight">Settings</h1>
+          <p className="text-xl text-muted-foreground">Configure your Creator Score preferences</p>
         </div>
-        <div className="flex flex-col items-center justify-center">
+
+        <div className="text-center text-sm text-muted-foreground">
+          <p>🚧 More settings options coming soon</p>
+        </div>
+
+        {/* <div className="flex flex-col items-center justify-center">
           <h2 className="text-2xl font-bold tracking-tight pb-5">Self Verification</h2>
           <SelfQRcodeWrapper
             selfApp={selfApp}
@@ -45,6 +71,7 @@ export default function SettingsPage() {
             }}
           />
         </div>
+        */}
       </div>
     </div>
   );

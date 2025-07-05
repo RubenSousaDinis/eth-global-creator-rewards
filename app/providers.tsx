@@ -27,8 +27,10 @@ export function Providers(props: { children: ReactNode }) {
             process.env.DYNAMIC_ENV_ID ||
             "x2762a57b-faa4-41ce-9f16-abff9300e2c9",
           walletConnectors: [EthereumWalletConnectors],
-          // Only show existing wallets for authentication (embedded wallets disabled in dashboard)
-          initialAuthenticationMode: "connect-only"
+          // Connect-only mode for low-risk use case
+          initialAuthenticationMode: "connect-only",
+          // Disable visitor tracking for privacy
+          enableVisitTrackingOnConnectOnly: false
         }}
       >
         {props.children}
