@@ -1,60 +1,99 @@
-// import { getUserIdentifier, SelfBackendVerifier, countryCodes } from "@selfxyz/core";
+import { SelfBackendVerifier, InMemoryConfigStore, AllIds, AttestationId } from "@selfxyz/core";
+import { NextRequest, NextResponse } from "next/server";
+import { BigNumberish } from "ethers";
 
-export async function POST() {
+// Configure dynamic verification based on user context
+const configStorage = new InMemoryConfigStore(async (userIdentifier: string, userDefinedData: string) => {
+  const context = JSON.parse(userDefinedData);
+
+  switch (context.action) {
+    case "creator-rewards":
+      return "adult_human_verification";
+    default:
+      return "adult_human_verification";
+  }
+});
+
+// Set up different verification configurations
+await configStorage.setConfig("adult_human_verification", {
+  minimumAge: 18,
+  excludedCountries: ["IRN", "PRK"],
+  ofac: true
+});
+
+// Initialize the verifier
+const verifier = new SelfBackendVerifier(
+  "creator-rewards", // Must match frontend scope
+  "https://cannes.creatorscore.app/api/self-verification", // Your verification endpoint
+  false, // Production mode (real passports)
+  AllIds, // Accept all document types
+  configStorage, // Dynamic configuration
+  "uuid" // User identifier type
+);
+
+export async function POST(request: NextRequest) {
   try {
-    // Temporarily disabled - missing @selfxyz/core dependency
-    return Response.json(
-      { message: "Self verification temporarily disabled" },
-      { status: 501 },
-    );
+    const { attestationId, proof, pubSignals, userContextData } = await request.json();
 
-    // const requestJson = await request.json();
-    // const { proof, publicSignals } = requestJson;
+    // Validate input
+    if (!attestationId || !proof || !pubSignals || !userContextData) {
+      return NextResponse.json({ error: "Missing required verification parameters" }, { status: 400 });
+    }
 
-    // if (!proof || !publicSignals) {
-    //   return Response.json({ message: "Missing required fields" }, { status: 400 });
-    // }
+    // Verify the proof
+    const result = await verifier.verify(attestationId, proof, pubSignals as BigNumberish[], userContextData);
 
-    // // Extract user ID from the proof
-    // const userId = await getUserIdentifier(publicSignals);
-    // console.log("Extracted userId:", userId);
+    // Check overall verification result
+    if (!result.isValidDetails.isValid) {
+      return NextResponse.json({ error: "Cryptographic proof verification failed" }, { status: 400 });
+    }
 
-    // // Initialize and configure the verifier
-    // const selfBackendVerifier = new SelfBackendVerifier("https://forno.celo.org", "creator-rewards");
+    // Check specific requirements
+    if (!result.isValidDetails.isMinimumAgeValid) {
+      return NextResponse.json({ error: "Age requirement not met" }, { status: 403 });
+    }
 
-    // // Configure verification options
-    // selfBackendVerifier.setMinimumAge(18);
-    // selfBackendVerifier.excludeCountries(
-    //   countryCodes.IRN, // Iran
-    //   countryCodes.PRK // North Korea
-    // );
-    // selfBackendVerifier.enableNameAndDobOfacCheck();
+    if (!result.isValidDetails.isOfacValid) {
+      return NextResponse.json({ error: "OFAC sanctions check failed" }, { status: 403 });
+    }
 
-    // // Verify the proof
-    // const result = await selfBackendVerifier.verify(proof, publicSignals);
+    // Parse user context to understand the request
+    const userContext = JSON.parse(result.userData.userDefinedData);
 
-    // if (result.isValid) {
-    //   return Response.json({ success: true }, { status: 200 });
-    //   // Return successful verification response
-    // } else {
-    //   // Return failed verification response
-    //   return Response.json(
-    //     {
-    //       result: false,
-    //       message: "Verification failed",
-    //       details: result.isValidDetails
-    //     },
-    //     { status: 400 }
-    //   );
-    // }
-  } catch (error) {
-    console.error("Error verifying proof:", error);
-    return Response.json(
-      {
-        result: false,
-        message: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 },
-    );
+    // Verification successful - return relevant information
+    return NextResponse.json({
+      verified: true,
+      verificationId: result.discloseOutput.nullifier,
+      userIdentifier: result.userData.userIdentifier,
+      nationality: result.discloseOutput.nationality,
+      ageVerified: result.isValidDetails.isMinimumAgeValid,
+      context: userContext,
+      // Include disclosed information based on your requirements
+      disclosedData: {
+        name: result.discloseOutput.name,
+        dateOfBirth: result.discloseOutput.dateOfBirth,
+        issuingState: result.discloseOutput.issuingState
+      }
+    });
+  } catch (error: any) {
+    console.error("Verification error:", error);
+
+    if (error.name === "ConfigMismatchError") {
+      // Log detailed configuration mismatches for debugging
+      console.error("Config mismatches:", error.issues);
+
+      return NextResponse.json(
+        {
+          error: "Configuration mismatch",
+          details: error.issues.map((issue: { type: string; message: string }) => ({
+            type: issue.type,
+            message: issue.message
+          }))
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({ error: "Internal verification error" }, { status: 500 });
   }
 }
